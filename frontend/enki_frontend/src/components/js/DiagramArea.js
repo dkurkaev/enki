@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext, createContext, useRef } from 'react';
+import React, {useEffect, useState, useContext, createContext, useRef, useCallback} from 'react';
 import ReactFlow, {
     addEdge,
     MiniMap,
@@ -11,9 +11,11 @@ import ReactFlow, {
 
 import 'reactflow/dist/style.css';
 
-import ContextMenu from './ContextMenu';
 import { fetchNodes, fetchEdges } from '../../api';
 import '../css/DiagramArea.css';
+import '../css/NodeContextMenu.css'
+import NodeContextMenu from './NodeContextMenu';
+
 import CustomNode from "./CustomNode";
 
 
@@ -27,8 +29,9 @@ const DiagramArea = () => {
     const { nodes, setNodes, edges, setEdges, setFinalNodeChanges, setFinalEdgeChanges } = useContext(DiagramContext);
     const [editingNode, setEditingNode] = useState(null);
     const [nodeLabel, setNodeLabel] = useState('');
-    const [contextMenu, setContextMenu] = useState({ visible: false, position: { x: 0, y: 0 } });
+    const [contextMenu, setContextMenu] = useState({ visible: false, position: { x: 0, y: 0 }, nodeId: null });
     const diagramRef = useRef(null);
+    const contextMenuRef = useRef(null);
 
     useEffect(() => {
         const fetchElements = async () => {
@@ -107,6 +110,37 @@ const DiagramArea = () => {
         setFinalEdgeChanges((prev) => [...prev, newEdge]);
     };
 
+    const onNodeContextMenu = useCallback(
+        (event, node) => {
+            event.preventDefault();
+            const nodeRect = event.target.getBoundingClientRect();
+            const paneRect = diagramRef.current.getBoundingClientRect();
+            setContextMenu({
+                visible: true,
+                nodeId: node.id,
+                position: {
+                    x: nodeRect.left - paneRect.left + window.scrollX,
+                    y: nodeRect.top - paneRect.top + window.scrollY,
+                }
+            });
+        },
+        [setContextMenu]
+    );
+
+    const handleClickOutside = (event) => {
+        if (contextMenuRef.current && !contextMenuRef.current.contains(event.target)) {
+            setContextMenu({ visible: false, position: { x: 0, y: 0 }, nodeId: null });
+        }
+    };
+
+    useEffect(() => {
+        document.addEventListener('click', handleClickOutside);
+        return () => {
+            document.removeEventListener('click', handleClickOutside);
+        };
+    }, []);
+
+
     const onNodeDoubleClick = (event, node) => {
         setEditingNode(node);
         setNodeLabel(node.data.label);
@@ -128,43 +162,58 @@ const DiagramArea = () => {
         setEditingNode(null);
     };
 
-    const onContextMenu = (event) => {
-        event.preventDefault();
-        const position = { x: event.clientX, y: event.clientY };
-        setContextMenu({ visible: true, position });
+    const handleChangeStatus = (nodeId, status) => {
+        setNodes((nodes) =>
+            nodes.map((node) => {
+                if (node.id === nodeId) {
+                    const updatedNode = { ...node, data: { ...node.data, status } };
+                    setFinalNodeChanges((prev) => {
+                        const nodeIndex = prev.findIndex((n) => n.id === nodeId);
+                        if (nodeIndex > -1) {
+                            prev[nodeIndex] = updatedNode;
+                        } else {
+                            prev.push({ ...updatedNode, isUpdated: true });
+                        }
+                        return [...prev];
+                    });
+                    return updatedNode;
+                }
+                return node;
+            })
+        );
+        setContextMenu({ visible: false, position: { x: 0, y: 0 }, nodeId: null });
     };
 
-    const handleClickOutside = (event) => {
-        if (diagramRef.current && !diagramRef.current.contains(event.target)) {
-            setContextMenu({ visible: false, position: { x: 0, y: 0 } });
-        }
-    };
-
-    useEffect(() => {
-        document.addEventListener('click', handleClickOutside);
-        return () => {
-            document.removeEventListener('click', handleClickOutside);
-        };
-    }, []);
 
 
 
 
     return (
-        <div className="diagram-container" onContextMenu={onContextMenu} ref={diagramRef}>
+        <div className="diagram-container" ref={diagramRef}>
             <ReactFlow
                 nodes={nodes}
                 edges={edges}
                 onNodesChange={onNodesChange}
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
+                onNodeContextMenu={onNodeContextMenu}
                 nodeTypes={nodeTypes}
                 onNodeDoubleClick={onNodeDoubleClick}
-                style={{ width: '100%', height: '100%' }}
+                //style={{ width: '100%', height: '100%' }}
+                fitView
             >
                 <MiniMap />
                 <Controls />
                 <Background />
+                {contextMenu.visible && (
+                    <NodeContextMenu
+                        id={contextMenu.nodeId}
+                        top={contextMenu.position.y}
+                        left={contextMenu.position.x}
+                        onChangeStatus={handleChangeStatus}
+                        ref={contextMenuRef} // Pass the ref to NodeContextMenu
+                    />
+                )}
             </ReactFlow>
         </div>
         );

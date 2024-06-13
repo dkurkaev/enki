@@ -23,9 +23,9 @@ const App = () => {
             <div className="app">
                 <Header />
                 <div className="main-content">
-                    <LeftPanel />
+                    {/*<LeftPanel />*/}
                     <DiagramArea /> {/* DiagramArea wraps its children */}
-                    <RightPanel />
+                    {/*<RightPanel />*/}
                 </div>
             </div>
         </DiagramContext.Provider>
