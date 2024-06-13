@@ -1,2 +1,3 @@
 # enki
-Small tool for creating enterprise architecture diagrams.
+
+Tool for cheating EA/SA diagrams using EA repository.
