@@ -1,0 +1,11 @@
+# Django exclusions
+backend/env/
+backend/__pycache__/
+backend/*.pyc
+
+# React exclusions
+frontend/node_modules/
+frontend/build/
+
+# Common exclusions
+.DS_Store
