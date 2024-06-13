@@ -1,0 +1,17 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.main-content {
+  display: flex;
+  flex: 1;
+  height: 100%;
+}
+
+.diagram-container {
+  flex-grow: 1;
+  background-color: #fff;
+  padding: 10px;
+}
