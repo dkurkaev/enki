@@ -1,7 +1,41 @@
 import React, { memo } from 'react';
 import { Handle, Position } from 'reactflow';
+import '../css/CustomNode.css';
+
 
 function CustomNode({ data }) {
+    const { label, functions } = data;
+
+    const renderFunction = (func) => {
+        let icon = '';
+        let color = '';
+
+        switch (func.status) {
+            case 'new':
+                icon = '🧩';
+                color = '#009900';
+                break;
+            case 'modify':
+                icon = '🔷️';
+                color = '#007FFF';
+                break;
+            case 'delete':
+                icon = '❌';
+                color = '#FF0000';
+                break;
+            case 'use':
+            default:
+                icon = '  ';
+                color = '#808080'; // gray
+                break;
+        }
+
+        return (
+            <div key={func.name} style={{ color }}>
+                {icon} {func.name}
+            </div>
+        );
+    };
 
     const getBorderColor = (status) => {
         switch (status) {
@@ -19,19 +53,12 @@ function CustomNode({ data }) {
     };
 
     return (
-        <div className="px-4 py-2 shadow-md rounded-md bg-white border-2" style={{ borderColor: getBorderColor(data.status) }}>
+        <div className="custom-node" style={{ borderColor: getBorderColor(data.status) }}>
             <div className="flex">
                 <div className="ml-2">
                     <div className="text-lg font-bold">{data.label}</div>
-                    <div className="text-gray-500 whitespace-pre-wrap">
-                        {data.functions ? data.functions.map((func, index) => (
-                            <div key={index}>
-                                {func.status === 'new' && <>🧩  {func.name}</>}
-                                {func.status === 'modify' && <>🖌️  {func.name}</>}
-                                {func.status === 'delete' && <>🖍️  {func.name}</>}
-                                {func.status === 'use' && <>      {func.name}</>}
-                            </div>
-                        )) : ''}
+                    <div className="custom-node-body">
+                        {functions.map(renderFunction)}
                     </div>
                 </div>
             </div>

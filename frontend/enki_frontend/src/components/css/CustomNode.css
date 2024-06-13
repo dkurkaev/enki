@@ -1,38 +1,21 @@
-/* src/components/css/CustomNode.css */
-
 .custom-node {
-    border: 2px solid #009900;
-    border-radius: 10px;
+    background: white;
+    border-radius: 4px;
+    border: 2px solid #009900; /* Default border color */
     padding: 10px;
-    background-color: white;
+    width: 200px;
 }
 
 .custom-node-header {
     font-weight: bold;
-    margin-bottom: 5px;
+    margin-bottom: 10px;
 }
 
-.custom-node-list {
-    list-style-type: disc;
-    padding-left: 20px;
+.custom-node-body {
+    display: flex;
+    flex-direction: column;
 }
 
-.custom-node-input {
-    width: 100%;
-}
-
-.custom-node-add-line {
-    margin-top: 5px;
-    color: #007bff;
-    background: none;
-    border: none;
-    cursor: pointer;
-}
-
-.custom-node-handle {
-    background: #555;
-}
-
-.node-resizer {
-    border: 2px solid #009900;
+.custom-node-body div {
+    margin: 2px 0;
 }
