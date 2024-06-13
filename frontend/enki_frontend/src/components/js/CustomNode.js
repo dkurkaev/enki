@@ -1,20 +1,45 @@
-// src/components/js/CustomNode.js
+import React, { memo } from 'react';
+import { Handle, Position } from 'reactflow';
 
-// src/components/js/CustomNode.js
+function CustomNode({ data }) {
 
-import React, { memo, useState } from 'react';
-import { Handle, Position, NodeResizer } from 'reactflow';
-import '../css/CustomNode.css';  // Import CSS for CustomNode
+    const getBorderColor = (status) => {
+        switch (status) {
+            case 'new':
+                return '#009900';
+            case 'modify':
+                return '#007FFF';
+            case 'delete':
+                return '#FF0000';
+            case 'use':
+                return '#6B7280'; // Tailwind's text-gray-500 color
+            default:
+                return '#000000'; // Default color if no status matches
+        }
+    };
 
-const CustomNode = ({ data, selected }) => {
     return (
-        <>
-            <NodeResizer color="#ff0071" isVisible={selected} minWidth={100} minHeight={30} />
-            <Handle type="target" position={Position.Left} />
-            <div style={{ padding: 10 }}>{data.label}</div>
-            <Handle type="source" position={Position.Right} />
-        </>
+        <div className="px-4 py-2 shadow-md rounded-md bg-white border-2" style={{ borderColor: getBorderColor(data.status) }}>
+            <div className="flex">
+                <div className="ml-2">
+                    <div className="text-lg font-bold">{data.label}</div>
+                    <div className="text-gray-500 whitespace-pre-wrap">
+                        {data.functions ? data.functions.map((func, index) => (
+                            <div key={index}>
+                                {func.status === 'new' && <>🧩  {func.name}</>}
+                                {func.status === 'modify' && <>🖌️  {func.name}</>}
+                                {func.status === 'delete' && <>🖍️  {func.name}</>}
+                                {func.status === 'use' && <>      {func.name}</>}
+                            </div>
+                        )) : ''}
+                    </div>
+                </div>
+            </div>
+
+            <Handle type="target" position={Position.Top} className="w-16 !bg-teal-500" />
+            <Handle type="source" position={Position.Bottom} className="w-16 !bg-teal-500" />
+        </div>
     );
-};
+}
 
 export default memo(CustomNode);

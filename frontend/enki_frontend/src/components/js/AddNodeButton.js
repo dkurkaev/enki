@@ -7,8 +7,19 @@ const AddNodeButton = () => {
     const addNode = () => {
         const newNode = {
             id: `node-${+new Date()}`,
-            type: 'CustomNode',
-            data: { label: `node-${+new Date()}` },
+            type: 'custom',
+            data: {
+                label: 'System',
+                type: 'system', // Add the type field
+                status: 'delete', // Add the status field
+                functions: [
+                    { status: 'new', name: 'Function 1' },
+                    { status: 'modify', name: 'Function 2' },
+                    { status: 'delete', name: 'Function 3' },
+                    { status: 'use', name: 'Function 4' },
+                    { status: 'use', name: 'Function 5' }
+                ]  // Add functions array with status and name
+            },
             position: { x: Math.random() * 250, y: Math.random() * 250 },
             isNew: true,  // Mark this node as new
         };

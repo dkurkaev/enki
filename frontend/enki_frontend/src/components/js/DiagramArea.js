@@ -15,10 +15,13 @@ import ContextMenu from './ContextMenu';
 import { fetchNodes, fetchEdges } from '../../api';
 import '../css/DiagramArea.css';
 import CustomNode from "./CustomNode";
-import customNode from "./CustomNode";
+
 
 export const DiagramContext = createContext();
 
+const nodeTypes = {
+    custom: CustomNode,
+};
 
 const DiagramArea = () => {
     const { nodes, setNodes, edges, setEdges, setFinalNodeChanges, setFinalEdgeChanges } = useContext(DiagramContext);
@@ -31,35 +34,15 @@ const DiagramArea = () => {
         const fetchElements = async () => {
             try {
                 const fetchedNodes = await fetchNodes();
-                const updatedNodes = fetchedNodes.map(node => {
-                    return {
-                        ...node,
-                        //type: node.type === 'custom' ? 'custom' : 'default',
-                        type: node.type,
-                        draggable: true, // Ensure nodes are draggable
-                        selectable: true,
-                        resizing: true
-                    };
-                });
                 const fetchedEdges = await fetchEdges();
 
-                //setNodes(fetchedNodes);
-                setNodes(fetchedNodes.map(node => ({
-                    ...node,
-                    type: 'custom'
-                })));
-                setEdges(fetchedEdges.map(edge => ({
-                    ...edge,
-                    //type: 'smoothstep',
-                    markerEnd: {
-                        type: MarkerType.ArrowClosed
-                    }
-                })));
+                setNodes(fetchedNodes);
+                setEdges(fetchedEdges);
+
             } catch (error) {
                 console.error('Error fetching elements:', error);
             }
         };
-
         fetchElements();
     }, [setNodes, setEdges]);
 
@@ -70,8 +53,6 @@ const DiagramArea = () => {
         nodeChanges.forEach(change => {
             switch (change.type) {
                 case 'remove':
-                    //const nodeToRemove = nodes.find(n => n.id === change.id);
-                    //setFinalNodeChanges((prev) => [...prev, { id: change.id, type: 'remove' }]);
                     setFinalNodeChanges((prev) => [...prev, { id: change.id, type: 'remove' }]);
                     break;
                 case 'update':
@@ -98,10 +79,7 @@ const DiagramArea = () => {
         edgeChanges.forEach(change => {
             switch (change.type) {
                 case 'remove':
-                    //const edgeToRemove = edges.find(e => e.id === change.id);
-                    //setFinalEdgeChanges((prev) => [...prev, { id: change.id, type: 'remove' }]);
                     setFinalEdgeChanges((prev) => [...prev, { id: change.id, type: 'remove' }]);
-
                     break;
                 case 'add':
                     setFinalEdgeChanges(prev => [...prev, change.item]);
@@ -169,9 +147,8 @@ const DiagramArea = () => {
         };
     }, []);
 
-    const nodeTypes = {
-        CustomNode,
-    };
+
+
 
     return (
         <div className="diagram-container" onContextMenu={onContextMenu} ref={diagramRef}>
@@ -181,7 +158,7 @@ const DiagramArea = () => {
                 onNodesChange={onNodesChange}
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
-                //nodeTypes={nodeTypes}  // Ensure nodeTypes include custom node
+                nodeTypes={nodeTypes}
                 onNodeDoubleClick={onNodeDoubleClick}
                 style={{ width: '100%', height: '100%' }}
             >
@@ -190,7 +167,9 @@ const DiagramArea = () => {
                 <Background />
             </ReactFlow>
         </div>
-    );
+        );
+
+
 };
 
 export default DiagramArea;
