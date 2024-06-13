@@ -1,10 +1,14 @@
-import React, { memo } from 'react';
+import React, {memo, useState} from 'react';
 import { Handle, Position } from 'reactflow';
+import FunctionPopup from './FunctionPopup';
+
 import '../css/CustomNode.css';
 
 
-function CustomNode({ data }) {
+function CustomNode({ data, id }) {
     const { label, functions } = data;
+    const [showPopup, setShowPopup] = useState(false);
+    const [selectedFunction, setSelectedFunction] = useState(null);
 
     const renderFunction = (func) => {
         let icon = '';
@@ -31,7 +35,7 @@ function CustomNode({ data }) {
         }
 
         return (
-            <div key={func.name} style={{ color }}>
+            <div key={func.id} style={{ color }} onDoubleClick={() => handleFunctionDoubleClick(func)}>
                 {icon} {func.name}
             </div>
         );
@@ -52,6 +56,16 @@ function CustomNode({ data }) {
         }
     };
 
+    const handleFunctionDoubleClick = (func) => {
+        setSelectedFunction(func);
+        setShowPopup(true);
+    };
+
+    const closePopup = () => {
+        setShowPopup(false);
+        setSelectedFunction(null);
+    };
+
     return (
         <div className="custom-node" style={{ borderColor: getBorderColor(data.status) }}>
             <div className="flex">
@@ -65,6 +79,10 @@ function CustomNode({ data }) {
 
             <Handle type="target" position={Position.Top} className="w-16 !bg-teal-500" />
             <Handle type="source" position={Position.Bottom} className="w-16 !bg-teal-500" />
+
+            {showPopup && (
+                <FunctionPopup functionData={selectedFunction} nodeId={id} onClose={closePopup} />
+            )}
         </div>
     );
 }

@@ -13,11 +13,11 @@ const AddNodeButton = () => {
                 type: 'system', // Add the type field
                 status: 'delete', // Add the status field
                 functions: [
-                    { status: 'new', name: 'Function 1' },
-                    { status: 'modify', name: 'Function 2' },
-                    { status: 'delete', name: 'Function 3' },
-                    { status: 'use', name: 'Function 4' },
-                    { status: 'use', name: 'Function 5' }
+                    { id: `func-${+new Date()}-${Math.floor(Math.random() * 1000000)}`, status: 'new', name: 'Function 1' },
+                    { id: `func-${+new Date()}-${Math.floor(Math.random() * 1000000)}`, status: 'modify', name: 'Function 2' },
+                    { id: `func-${+new Date()}-${Math.floor(Math.random() * 1000000)}`, status: 'delete', name: 'Function 3' },
+                    { id: `func-${+new Date()}-${Math.floor(Math.random() * 1000000)}`, status: 'use', name: 'Function 4' },
+                    { id: `func-${+new Date()}-${Math.floor(Math.random() * 1000000)}`, status: 'use', name: 'Function 5' }
                 ]  // Add functions array with status and name
             },
             position: { x: Math.random() * 250, y: Math.random() * 250 },

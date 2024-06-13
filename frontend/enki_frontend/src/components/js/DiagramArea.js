@@ -33,6 +33,7 @@ const DiagramArea = () => {
     const diagramRef = useRef(null);
     const contextMenuRef = useRef(null);
 
+
     useEffect(() => {
         const fetchElements = async () => {
             try {
@@ -49,47 +50,93 @@ const DiagramArea = () => {
         fetchElements();
     }, [setNodes, setEdges]);
 
-    const onNodesChange = (nodeChanges) => {
-        const updatedNodes = applyNodeChanges(nodeChanges, nodes);
-        setNodes(updatedNodes);
+    // const onNodesChange = (nodeChanges) => {
+    //     const updatedNodes = applyNodeChanges(nodeChanges, nodes);
+    //     setNodes(updatedNodes);
+    //
+    //     nodeChanges.forEach(change => {
+    //         switch (change.type) {
+    //             case 'remove':
+    //                 setFinalNodeChanges((prev) => [...prev, { id: change.id, type: 'remove' }]);
+    //                 break;
+    //             case 'update':
+    //             case 'position':
+    //                 const nodeToUpdate = updatedNodes.find(n => n.id === change.id) || change.item;
+    //                 setFinalNodeChanges(prev => {
+    //                     const updated = prev.filter(n => n.id !== nodeToUpdate.id);
+    //                     return [...updated, nodeToUpdate];
+    //                 });
+    //                 break;
+    //             case 'add':
+    //                 setFinalNodeChanges(prev => [...prev, change.item]);
+    //                 break;
+    //             default:
+    //                 break;
+    //         }
+    //     });
+    // };
 
-        nodeChanges.forEach(change => {
-            switch (change.type) {
-                case 'remove':
-                    setFinalNodeChanges((prev) => [...prev, { id: change.id, type: 'remove' }]);
-                    break;
-                case 'update':
-                case 'position':
-                    const nodeToUpdate = updatedNodes.find(n => n.id === change.id) || change.item;
-                    setFinalNodeChanges(prev => {
-                        const updated = prev.filter(n => n.id !== nodeToUpdate.id);
-                        return [...updated, nodeToUpdate];
-                    });
-                    break;
-                case 'add':
-                    setFinalNodeChanges(prev => [...prev, change.item]);
-                    break;
-                default:
-                    break;
-            }
+    const onNodesChange = (changes) => {
+        setNodes((nds) => {
+            const updatedNodes = applyNodeChanges(changes, nds);
+            changes.forEach(change => {
+                switch (change.type) {
+                    case 'remove':
+                        setFinalNodeChanges((prev) => [...prev, { id: change.id, type: 'remove' }]);
+                        break;
+                    case 'update':
+                    case 'position':
+                        const nodeToUpdate = updatedNodes.find(n => n.id === change.id) || change.item;
+                        setFinalNodeChanges(prev => {
+                            const updated = prev.filter(n => n.id !== nodeToUpdate.id);
+                            return [...updated, nodeToUpdate];
+                        });
+                        break;
+                    case 'add':
+                        setFinalNodeChanges(prev => [...prev, change.item]);
+                        break;
+                    default:
+                        break;
+                }
+            });
+            return updatedNodes;
         });
     };
 
-    const onEdgesChange = (edgeChanges) => {
-        const updatedEdges = applyEdgeChanges(edgeChanges, edges);
-        setEdges(updatedEdges);
+    // const onEdgesChange = (edgeChanges) => {
+    //     const updatedEdges = applyEdgeChanges(edgeChanges, edges);
+    //     setEdges(updatedEdges);
+    //
+    //     edgeChanges.forEach(change => {
+    //         switch (change.type) {
+    //             case 'remove':
+    //                 setFinalEdgeChanges((prev) => [...prev, { id: change.id, type: 'remove' }]);
+    //                 break;
+    //             case 'add':
+    //                 setFinalEdgeChanges(prev => [...prev, change.item]);
+    //                 break;
+    //             default:
+    //                 break;
+    //         }
+    //     });
+    // };
 
-        edgeChanges.forEach(change => {
-            switch (change.type) {
-                case 'remove':
-                    setFinalEdgeChanges((prev) => [...prev, { id: change.id, type: 'remove' }]);
-                    break;
-                case 'add':
-                    setFinalEdgeChanges(prev => [...prev, change.item]);
-                    break;
-                default:
-                    break;
-            }
+    const onEdgesChange = (changes) => {
+        setEdges((eds) => {
+            const updatedEdges = applyEdgeChanges(changes, eds);
+            changes.forEach(change => {
+                switch (change.type) {
+                    case 'remove':
+                        setFinalEdgeChanges((prev) => [...prev, { id: change.id, type: 'remove' }]);
+                        break;
+                    case 'add':
+                        setFinalEdgeChanges(prev => [...prev, change.item]);
+                        break;
+                    default:
+                        break;
+                }
+            });
+            return updatedEdges;
         });
     };
 

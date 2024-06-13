@@ -30,6 +30,11 @@ export const createEdge = async (edge) => {
     return response.data;
 };
 
+export const updateEdge = async (id, edge) => {
+    const response = await axios.put(`${API_BASE_PATH}/edges/${id}/`, edge);
+    return response.data;
+};
+
 export const deleteEdge = async (id) => {
     const response = await axios.delete(`${API_BASE_PATH}/edges/${id}/`);
     return response.data;
