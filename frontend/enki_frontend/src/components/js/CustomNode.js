@@ -1,5 +1,5 @@
-import React, {memo, useState} from 'react';
-import { Handle, Position } from 'reactflow';
+import React, {memo, useEffect, useRef, useState} from 'react';
+import { Handle, Position, NodeResizer, useUpdateNodeInternals } from 'reactflow';
 import FunctionPopup from './FunctionPopup';
 
 import '../css/CustomNode.css';
@@ -9,11 +9,23 @@ function CustomNode({ data, id }) {
     const { label, functions, height, width  } = data;
     const [showPopup, setShowPopup] = useState(false);
     const [selectedFunction, setSelectedFunction] = useState(null);
+    const [minHeight, setMinHeight] = useState(50);
+    const labelRef = useRef(null);
+    const functionsRef = useRef(null);
+    const updateNodeInternals = useUpdateNodeInternals();
 
-    console.log("data = " + data.label)
-    console.log("id = " + id)
-    console.log("height = " + data.height)
-    console.log("width = " + data.width)
+    useEffect(() => {
+        updateNodeInternals(id);
+    }, [height, width, id, updateNodeInternals]);
+
+
+    const onResize = (newWidth, newHeight) => {
+        // Update the node size in your state management here
+        data.width = newWidth;
+        data.height = newHeight;
+        updateNodeInternals(id);
+        console.log(`Node resized to width: ${newWidth}, height: ${newHeight}`);
+    };
 
     const renderFunction = (func) => {
         let icon = '';
@@ -75,7 +87,15 @@ function CustomNode({ data, id }) {
 
     return (
         <div className="custom-node" style={{ borderColor: getBorderColor(data.status), width, height }}>
-            <div className="flex" >
+            <NodeResizer
+                color="#ffffff"
+                isVisible={true}
+                onResize={onResize}
+                minWidth={150}
+                minHeight={150}
+                position={Position.BottomRight}
+            />
+            <div className="flex">
                 <div className="ml-2">
                     <div className="text-lg font-bold">{data.label}</div>
                     <div className="custom-node-body">

@@ -73,7 +73,17 @@ const SaveChangesButton = () => {
             // Fetch updated nodes and edges from backend
             const fetchedNodes = await fetchNodes();
             const fetchedEdges = await fetchEdges();
-            setNodes(fetchedNodes);
+
+            const nodesWithSize = fetchedNodes.map(node => ({
+                ...node,
+                data: {
+                    ...node.data,
+                    width: node.width || 150, // default width if not available
+                    height: node.height || 150, // default height if not available
+                }
+            }));
+
+            setNodes(nodesWithSize);
             setEdges(fetchedEdges);
 
             console.log('Changes saved successfully!');
