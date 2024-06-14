@@ -5,6 +5,9 @@ class Node(models.Model):
     type = models.CharField(max_length=100, default="default")
     data = models.JSONField()
     position = models.JSONField()
+    height = models.IntegerField(default=150)
+    width = models.IntegerField(default=150)
+
 
     def __str__(self):
         return self.id

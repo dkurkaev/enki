@@ -40,12 +40,26 @@ export const deleteEdge = async (id) => {
     return response.data;
 };
 
+// export const fetchNodes = async () => {
+//     const response = await axios.get(`${API_BASE_PATH}/nodes/`);
+//     return response.data;
+// };
+
 export const fetchNodes = async () => {
+    console.log("Fetching nodes...");
     const response = await axios.get(`${API_BASE_PATH}/nodes/`);
+    console.log("Nodes fetched:", response.data);
     return response.data;
 };
 
+// export const fetchEdges = async () => {
+//     const response = await axios.get(`${API_BASE_PATH}/edges/`);
+//     return response.data;
+// };
+
 export const fetchEdges = async () => {
+    console.log("Fetching edges...");
     const response = await axios.get(`${API_BASE_PATH}/edges/`);
+    console.log("Edges fetched:", response.data);
     return response.data;
 };

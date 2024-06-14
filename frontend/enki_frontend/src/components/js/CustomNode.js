@@ -6,9 +6,14 @@ import '../css/CustomNode.css';
 
 
 function CustomNode({ data, id }) {
-    const { label, functions } = data;
+    const { label, functions, height, width  } = data;
     const [showPopup, setShowPopup] = useState(false);
     const [selectedFunction, setSelectedFunction] = useState(null);
+
+    console.log("data = " + data.label)
+    console.log("id = " + id)
+    console.log("height = " + data.height)
+    console.log("width = " + data.width)
 
     const renderFunction = (func) => {
         let icon = '';
@@ -66,9 +71,11 @@ function CustomNode({ data, id }) {
         setSelectedFunction(null);
     };
 
+
+
     return (
-        <div className="custom-node" style={{ borderColor: getBorderColor(data.status) }}>
-            <div className="flex">
+        <div className="custom-node" style={{ borderColor: getBorderColor(data.status), width, height }}>
+            <div className="flex" >
                 <div className="ml-2">
                     <div className="text-lg font-bold">{data.label}</div>
                     <div className="custom-node-body">

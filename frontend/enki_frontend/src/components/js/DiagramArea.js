@@ -36,18 +36,27 @@ const DiagramArea = () => {
 
     useEffect(() => {
         const fetchElements = async () => {
-            try {
-                const fetchedNodes = await fetchNodes();
-                const fetchedEdges = await fetchEdges();
+            const [fetchedNodes, fetchedEdges] = await Promise.all([fetchNodes(), fetchEdges()]);
 
-                setNodes(fetchedNodes);
-                setEdges(fetchedEdges);
+            const nodesWithSize = fetchedNodes.map(node => ({
+                ...node,
+                data: {
+                    ...node.data,
+                    width: node.width || 150, // default width if not available
+                    height: node.height || 150, // default height if not available
+                }
+            }));
 
-            } catch (error) {
-                console.error('Error fetching elements:', error);
-            }
+            setNodes(nodesWithSize);
+            setEdges(fetchedEdges);
+
+            console.log("Loggg:")
+            console.log(fetchedNodes)
         };
+
         fetchElements();
+
+
     }, [setNodes, setEdges]);
 
     // const onNodesChange = (nodeChanges) => {

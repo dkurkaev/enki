@@ -4,8 +4,11 @@ from ninja import Schema
 class NodeSchema(Schema):
     id: str
     type: str
-    data: dict
     position: dict
+    data: dict
+
+    height: int
+    width: int
 
 
 class EdgeSchema(Schema):
