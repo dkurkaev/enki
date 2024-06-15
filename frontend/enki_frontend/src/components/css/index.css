@@ -67,7 +67,7 @@ body, html, .providerflow {
 }
 
 .sidebar {
-    width: 250px;
+    width: 40%;
     background: #f5f5f5; /* Light background color */
     border-left: 1px solid #ddd; /* Border for sidebar */
     border-top: 1px solid #ddd; /* Border for top */
@@ -114,4 +114,59 @@ body, html, .providerflow {
 
 .sidebar button:hover {
     background-color: #b0b0b0; /* Slightly darker grey for hover */
+}
+
+.node-update {
+    margin-top: 20px;
+}
+
+.node-update label {
+    display: block;
+    margin-top: 10px;
+}
+
+.node-update input {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+}
+
+/*.node-update {*/
+/*    background-color: #fff;*/
+/*    border: 1px solid #ccc;*/
+/*    padding: 10px;*/
+/*    box-sizing: border-box;*/
+/*    width: 300px;*/
+/*}*/
+
+.node-update .function-group {
+    margin-bottom: 15px; /* Add margin between function groups */
+    display: flex;
+    align-items: center;
+}
+
+.node-update .function-group select,
+.node-update .function-group input {
+    margin-right: 5px;
+}
+
+.node-update .function-group .function-status {
+    width: 30%;
+    margin-right: 10px; /* Space between status and function name */
+}
+
+.node-update .function-group .function-name {
+    width: 70%;
+}
+
+.node-update .add-function-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    padding: 5px 10px;
+    margin-top: 10px;
+    width: 100%;
 }

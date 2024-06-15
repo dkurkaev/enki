@@ -102,8 +102,8 @@ const CustomNode = ({ data, id, selected }) => {
                 </div>
             </div>
 
-            <Handle type="target" position={Position.Top} className="w-16 !bg-teal-500" />
-            <Handle type="source" position={Position.Bottom} className="w-16 !bg-teal-500" />
+            <Handle type="target" isConnectableStart="true" isConnectableEnd="true" position={Position.Top} className="w-16 !bg-teal-500" />
+            <Handle type="source" isConnectableStart="true" isConnectableEnd="true" position={Position.Bottom} className="w-16 !bg-teal-500" />
 
             {showPopup && (
                 <FunctionPopup functionData={selectedFunction} nodeId={id} onClose={closePopup} />
