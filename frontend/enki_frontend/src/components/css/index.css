@@ -1,46 +1,117 @@
-.providerflow {
-    flex-direction: column;
-    display: flex;
-    flex-grow: 1;
+/* Add these styles to your existing index.css */
+
+body, html, .providerflow {
+    margin: 0;
+    padding: 0;
+    width: 100%;
     height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
-.providerflow aside {
-    border-left: 1px solid #eee;
-    padding: 15px 10px;
-    font-size: 12px;
-    background: #fff;
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: white;
+    color: grey;
+    width: 100%;
+    border-bottom: 1px solid #ddd;
 }
 
-.providerflow aside .description {
+.header-left {
+    display: flex;
+    align-items: center;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+}
+
+.header button {
+    background-color: #d3d3d3; /* Light grey */
+    border: none;
+    color: #333; /* Darker text color for contrast */
+    padding: 10px 20px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-left: 10px; /* Space between buttons */
+}
+
+.header button:hover {
+    background-color: #b0b0b0; /* Slightly darker grey for hover */
+}
+
+.toggle-sidebar-btn {
+    background-color: #444;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.toggle-sidebar-btn:hover {
+    background-color: #555;
+}
+
+.reactflow-wrapper {
+    flex-grow: 1;
+    display: flex;
+    width: 100%;
+    position: relative;
+}
+
+.sidebar {
+    width: 250px;
+    background: #f5f5f5; /* Light background color */
+    border-left: 1px solid #ddd; /* Border for sidebar */
+    border-top: 1px solid #ddd; /* Border for top */
+    padding: 15px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto; /* Ensure content is scrollable */
+}
+
+.hidden-sidebar {
+    display: none;
+}
+
+.sidebar .description {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.sidebar .title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #000;
     margin-bottom: 10px;
 }
 
-.providerflow aside .title {
-    font-weight: 700;
-    margin-bottom: 5px;
+.sidebar .transform, .sidebar .node {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 10px;
 }
 
-.providerflow aside .transform {
-    margin-bottom: 20px;
-}
-
-.providerflow .reactflow-wrapper {
-    flex-grow: 1;
-}
-
-.providerflow .selectall {
+.sidebar .selectall button {
+    background-color: #d3d3d3;
+    border: none;
+    color: #333;
+    padding: 10px 15px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 4px;
     margin-top: 10px;
 }
 
-@media screen and (min-width: 768px) {
-    .providerflow {
-        flex-direction: row;
-    }
-
-    .providerflow aside {
-        width: 20%;
-        max-width: 250px;
-        height: 200px;
-    }
+.sidebar button:hover {
+    background-color: #b0b0b0; /* Slightly darker grey for hover */
 }

@@ -1,60 +1,39 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import ReactFlow, {
     addEdge,
     MiniMap,
     Controls,
     Background,
     useNodesState,
-    useEdgesState, useReactFlow, ReactFlowProvider,
-} from 'reactflow'
+    useEdgesState,
+    useReactFlow,
+    ReactFlowProvider,
+} from 'reactflow';
 
-// import {nodes as initialNodes, edges as initialEdges} from "./FetchElements";
-
-import useFetchElements from "./FetchElements";
-
-// import AnnotationNode from './AnnotationNode';
-// import ToolbarNode from './ToolbarNode';
-// import ResizerNode from './ResizerNode';
-// import CircleNode from './CircleNode';
-// import TextNode from './TextNode';
-// import ButtonEdge from './ButtonEdge';
-import CustomNode from "./CustomNode";
-import addNodeButton from "./AddNodeButton";
+import useFetchElements from './FetchElements';
+import CustomNode from './CustomNode';
+import AddNodeButton from './AddNodeButton';
+import SaveChangesButton from './SaveChangesButton';
+import Sidebar from './Sidebar';
+import NodeContextMenu from './NodeContextMenu';
 
 import 'reactflow/dist/style.css';
-import '../css/index.css'
+import '../css/index.css';
 import '../css/Overview.css';
-import fetchElements from "./FetchElements";
-import Sidebar from "./Sidebar";
-import AddNodeButton from "./AddNodeButton";
-import SaveChangesButton from "./SaveChangesButton";
-
 
 const nodeTypes = {
-    // annotation: AnnotationNode,
-    // tools: ToolbarNode,
-    // resizer: ResizerNode,
-    // circle: CircleNode,
-    // textinput: TextNode,
-    custom: CustomNode
+    custom: CustomNode,
 };
-
-// const edgeTypes = {
-//     button: ButtonEdge,
-// };
-
-const nodeClassName = (node) => node.type;
 
 const Flow = () => {
     const { nodes: initialNodes, edges: initialEdges, loading } = useFetchElements();
-
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-
-    console.log("Нафетчили:")
-    console.log(nodes)
+    const [sidebarVisible, setSidebarVisible] = useState(false); // Hide sidebar by default
+    const [contextMenu, setContextMenu] = useState({ visible: false, position: { x: 0, y: 0 }, nodeId: null });
 
     const { setViewport } = useReactFlow();
+    const contextMenuRef = useRef(null);
 
     useEffect(() => {
         if (!loading) {
@@ -64,19 +43,69 @@ const Flow = () => {
         }
     }, [loading, initialNodes, initialEdges, setNodes, setEdges, setViewport]);
 
-
     const onConnect = useCallback(
         (params) => setEdges((eds) => addEdge(params, eds)),
-        [],
+        []
     );
+
+    const toggleSidebar = () => {
+        setSidebarVisible((prev) => !prev);
+    };
+
+    const onNodeContextMenu = useCallback(
+        (event, node) => {
+            event.preventDefault();
+            const diagramRect = document.querySelector('.reactflow-wrapper').getBoundingClientRect();
+            setContextMenu({
+                visible: true,
+                nodeId: node.id,
+                position: {
+                    x: event.clientX - diagramRect.left + 5, // Adjusting the X coordinate to position the menu slightly right
+                    y: event.clientY - diagramRect.top + 5, // Adjusting the Y coordinate to position the menu slightly below
+                },
+            });
+        },
+        []
+    );
+
+    const handleClickOutside = (event) => {
+        if (contextMenuRef.current && !contextMenuRef.current.contains(event.target)) {
+            setContextMenu({ visible: false, position: { x: 0, y: 0 }, nodeId: null });
+        }
+    };
+
+    useEffect(() => {
+        document.addEventListener('click', handleClickOutside);
+        return () => {
+            document.removeEventListener('click', handleClickOutside);
+        };
+    }, []);
+
+    const handleChangeStatus = (nodeId, status) => {
+        setNodes((nds) =>
+            nds.map((node) => {
+                if (node.id === nodeId) {
+                    return { ...node, data: { ...node.data, status } };
+                }
+                return node;
+            })
+        );
+        setContextMenu({ visible: false, position: { x: 0, y: 0 }, nodeId: null });
+    };
 
     return (
         <div className="providerflow">
             <ReactFlowProvider>
                 <div className="header">
-                    <button>New Diagram</button>
-                    <SaveChangesButton/>
-                    <AddNodeButton />
+                    <div className="header-left">
+                        <SaveChangesButton />
+                        <AddNodeButton />
+                    </div>
+                    <div className="header-right">
+                        <button onClick={toggleSidebar} className="toggle-sidebar-btn">
+                            {sidebarVisible ? 'Hide Sidebar' : 'Show Sidebar'}
+                        </button>
+                    </div>
                 </div>
                 <div className="reactflow-wrapper">
                     <ReactFlow
@@ -85,21 +114,29 @@ const Flow = () => {
                         onNodesChange={onNodesChange}
                         onEdgesChange={onEdgesChange}
                         onConnect={onConnect}
+                        onNodeContextMenu={onNodeContextMenu}
                         fitView
                         attributionPosition="top-right"
                         nodeTypes={nodeTypes}
-                        // edgeTypes={edgeTypes}
                         className="overview"
                     >
-                        <MiniMap zoomable pannable nodeClassName={nodeClassName} />
+                        <MiniMap />
                         <Controls />
                         <Background />
                     </ReactFlow>
+                    <Sidebar nodes={nodes} setNodes={setNodes} hidden={!sidebarVisible} />
+                    {contextMenu.visible && (
+                        <NodeContextMenu
+                            id={contextMenu.nodeId}
+                            top={contextMenu.position.y}
+                            left={contextMenu.position.x}
+                            onChangeStatus={handleChangeStatus}
+                            ref={contextMenuRef}
+                        />
+                    )}
                 </div>
-                <Sidebar nodes={nodes} setNodes={setNodes} />
             </ReactFlowProvider>
         </div>
-
     );
 };
 
