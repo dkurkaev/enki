@@ -1,30 +1,26 @@
-import React, {memo, useEffect, useRef, useState} from 'react';
+import { memo, useEffect, useState } from 'react';
 import { Handle, Position, NodeResizer, useUpdateNodeInternals } from 'reactflow';
 import FunctionPopup from './FunctionPopup';
-
 import '../css/CustomNode.css';
 
-
-function CustomNode({ data, id }) {
-    const { label, functions, height, width  } = data;
+const CustomNode = ({ data, id, selected }) => {
+    const { label, status, functions, height, width } = data;
     const [showPopup, setShowPopup] = useState(false);
     const [selectedFunction, setSelectedFunction] = useState(null);
-    const [minHeight, setMinHeight] = useState(50);
-    const labelRef = useRef(null);
-    const functionsRef = useRef(null);
     const updateNodeInternals = useUpdateNodeInternals();
 
     useEffect(() => {
         updateNodeInternals(id);
     }, [height, width, id, updateNodeInternals]);
 
+    const handleFunctionDoubleClick = (func) => {
+        setSelectedFunction(func);
+        setShowPopup(true);
+    };
 
-    const onResize = (newWidth, newHeight) => {
-        // Update the node size in your state management here
-        data.width = newWidth;
-        data.height = newHeight;
-        updateNodeInternals(id);
-        console.log(`Node resized to width: ${newWidth}, height: ${newHeight}`);
+    const closePopup = () => {
+        setShowPopup(false);
+        setSelectedFunction(null);
     };
 
     const renderFunction = (func) => {
@@ -73,34 +69,18 @@ function CustomNode({ data, id }) {
         }
     };
 
-    const handleFunctionDoubleClick = (func) => {
-        setSelectedFunction(func);
-        setShowPopup(true);
-    };
-
-    const closePopup = () => {
-        setShowPopup(false);
-        setSelectedFunction(null);
-    };
-
-
-
     return (
-        <div className="custom-node" style={{ borderColor: getBorderColor(data.status), width, height }}>
+        <div className="custom-node" style={{ borderColor: getBorderColor(status), width, height }}>
             <NodeResizer
-                color="#ffffff"
-                isVisible={true}
-                onResize={onResize}
-                minWidth={150}
-                minHeight={150}
-                position={Position.BottomRight}
+                color="#ff0071"
+                isVisible={selected}
+                minWidth={100}
+                minHeight={30}
             />
-            <div className="flex">
-                <div className="ml-2">
-                    <div className="text-lg font-bold">{data.label}</div>
-                    <div className="custom-node-body">
-                        {functions.map(renderFunction)}
-                    </div>
+            <div className="ml-2">
+                <div className="text-lg font-bold">{data.label}</div>
+                <div className="custom-node-body">
+                    {functions.map(renderFunction)}
                 </div>
             </div>
 
@@ -112,6 +92,6 @@ function CustomNode({ data, id }) {
             )}
         </div>
     );
-}
+};
 
 export default memo(CustomNode);

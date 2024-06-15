@@ -1,38 +1,51 @@
-import React, {useEffect, useState, useContext, createContext, useRef, useCallback} from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import ReactFlow, {
+    useNodesState,
+    useEdgesState,
+    useReactFlow,
     addEdge,
     MiniMap,
     Controls,
     Background,
     applyNodeChanges,
     applyEdgeChanges,
-    MarkerType,
 } from 'reactflow';
-
 import 'reactflow/dist/style.css';
-
 import { fetchNodes, fetchEdges } from '../../api';
 import '../css/DiagramArea.css';
-import '../css/NodeContextMenu.css'
+import '../css/NodeContextMenu.css';
 import NodeContextMenu from './NodeContextMenu';
-
-import CustomNode from "./CustomNode";
-
-
-export const DiagramContext = createContext();
+import CustomNode from './CustomNode';
 
 const nodeTypes = {
     custom: CustomNode,
 };
 
-const DiagramArea = () => {
-    const { nodes, setNodes, edges, setEdges, setFinalNodeChanges, setFinalEdgeChanges } = useContext(DiagramContext);
-    const [editingNode, setEditingNode] = useState(null);
-    const [nodeLabel, setNodeLabel] = useState('');
+const DiagramArea = ({
+                         addedNodes,
+                         setAddedNodes,
+                         updatedNodes,
+                         setUpdatedNodes,
+                         deletedNodes,
+                         setDeletedNodes,
+                         addedEdges,
+                         setAddedEdges,
+                         updatedEdges,
+                         setUpdatedEdges,
+                         deletedEdges,
+                         setDeletedEdges,
+                     }) => {
+    const [nodes, setNodes, onNodesChange] = useNodesState([]);
+    const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+    const { setViewport } = useReactFlow();
     const [contextMenu, setContextMenu] = useState({ visible: false, position: { x: 0, y: 0 }, nodeId: null });
     const diagramRef = useRef(null);
     const contextMenuRef = useRef(null);
 
+    const handleNodeResize = (id, newWidth, newHeight) => {
+        setNodes((nodes) => nodes.map((node) => node.id === id ? { ...node, width: newWidth, height: newHeight } : node));
+        setUpdatedNodes((prev) => [...prev, { id, width: newWidth, height: newHeight }]);
+    };
 
     useEffect(() => {
         const fetchElements = async () => {
@@ -40,115 +53,91 @@ const DiagramArea = () => {
 
             const nodesWithSize = fetchedNodes.map(node => ({
                 ...node,
-                data: {
-                    ...node.data,
-                    width: node.width || 150, // default width if not available
-                    height: node.height || 150, // default height if not available
-                }
+                width: node.width || 150,
+                height: node.height || 150,
             }));
 
             setNodes(nodesWithSize);
             setEdges(fetchedEdges);
 
-            console.log("Loggg:")
-            console.log(fetchedNodes)
+            console.log("Fetchez sizez:")
+            console.log(nodesWithSize)
+
+            setViewport({ x: 0, y: 0, zoom: 1 }); // Reset viewport to default on load
         };
 
         fetchElements();
+    }, [setNodes, setEdges, setViewport]);
 
-
-    }, [setNodes, setEdges]);
-
-
-    const onNodesChange = (changes) => {
-        setNodes((nds) => {
-            const updatedNodes = applyNodeChanges(changes, nds);
-            changes.forEach(change => {
-                switch (change.type) {
-                    case 'remove':
-                        setFinalNodeChanges((prev) => [...prev, { id: change.id, type: 'remove' }]);
-                        break;
-                    case 'update':
-                    case 'position':
-                        const nodeToUpdate = updatedNodes.find(n => n.id === change.id) || change.item;
-                        setFinalNodeChanges(prev => {
-                            const updated = prev.filter(n => n.id !== nodeToUpdate.id);
-                            return [...updated, nodeToUpdate];
-                        });
-                        break;
-                    case 'add':
-                        setFinalNodeChanges(prev => [...prev, change.item]);
-                        break;
-                    case 'resize': // Handling resize
-                        const resizedNode = updatedNodes.find(n => n.id === change.id);
-                        if (resizedNode) {
-                            setFinalNodeChanges(prev => {
-                                const updated = prev.filter(n => n.id !== resizedNode.id);
-                                return [...updated, resizedNode];
-                            });
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            });
-            return updatedNodes;
-        });
-    };
-
-    // const onEdgesChange = (edgeChanges) => {
-    //     const updatedEdges = applyEdgeChanges(edgeChanges, edges);
-    //     setEdges(updatedEdges);
-    //
-    //     edgeChanges.forEach(change => {
-    //         switch (change.type) {
-    //             case 'remove':
-    //                 setFinalEdgeChanges((prev) => [...prev, { id: change.id, type: 'remove' }]);
-    //                 break;
-    //             case 'add':
-    //                 setFinalEdgeChanges(prev => [...prev, change.item]);
-    //                 break;
-    //             default:
-    //                 break;
-    //         }
-    //     });
-    // };
-
-    const onEdgesChange = (changes) => {
-        setEdges((eds) => {
-            const updatedEdges = applyEdgeChanges(changes, eds);
-            changes.forEach(change => {
-                switch (change.type) {
-                    case 'remove':
-                        setFinalEdgeChanges((prev) => [...prev, { id: change.id, type: 'remove' }]);
-                        break;
-                    case 'add':
-                        setFinalEdgeChanges(prev => [...prev, change.item]);
-                        break;
-                    default:
-                        break;
-                }
-            });
-            return updatedEdges;
-        });
-    };
-
-
-    // In the onConnect function in DiagramArea.js
     const onConnect = (params) => {
-        const edgeId = `e${params.source}-${params.target}`;
         const newEdge = {
-            id: edgeId,
+            id: `e${params.source}-${params.target}`,
             source: params.source,
             target: params.target,
-            //type: 'smoothstep',
             markerEnd: { type: 'arrowclosed' },
-            animated: false, // Ensure animated field is included
-            isNew: true  // Mark this edge as new
+            animated: false,
         };
-        setEdges((eds) => addEdge(params, eds));
-        setFinalEdgeChanges((prev) => [...prev, newEdge]);
+        setEdges((eds) => addEdge(newEdge, eds));
+        setAddedEdges((prev) => [...prev, newEdge]);
     };
+
+    const handleEdgesChange = useCallback((changes) => {
+        const added = [];
+        const updated = [];
+        const removed = [];
+
+        changes.forEach(change => {
+            switch (change.type) {
+                case 'add':
+                    added.push(change.item);
+                    break;
+                case 'update':
+                case 'position':
+                case 'resize':
+                    updated.push(change.item);
+                    break;
+                case 'remove':
+                    removed.push(change.id);
+                    break;
+                default:
+                    break;
+            }
+        });
+
+        setEdges((eds) => applyEdgeChanges(changes, eds));
+        setAddedEdges((prev) => [...prev, ...added]);
+        setUpdatedEdges((prev) => [...prev, ...updated]);
+        setDeletedEdges((prev) => [...prev, ...removed]);
+    }, [setEdges, setAddedEdges, setUpdatedEdges, setDeletedEdges]);
+
+    const handleNodesChange = useCallback((changes) => {
+        const added = [];
+        const updated = [];
+        const removed = [];
+
+        changes.forEach(change => {
+            switch (change.type) {
+                case 'add':
+                    added.push(change.item);
+                    break;
+                case 'update':
+                case 'position':
+                case 'resize':
+                    updated.push(change.item);
+                    break;
+                case 'remove':
+                    removed.push(change.id);
+                    break;
+                default:
+                    break;
+            }
+        });
+
+        setNodes((nds) => applyNodeChanges(changes, nds));
+        setAddedNodes((prev) => [...prev, ...added]);
+        setUpdatedNodes((prev) => [...prev, ...updated]);
+        setDeletedNodes((prev) => [...prev, ...removed]);
+    }, [setNodes, setAddedNodes, setUpdatedNodes, setDeletedNodes]);
 
     const onNodeContextMenu = useCallback(
         (event, node) => {
@@ -164,7 +153,7 @@ const DiagramArea = () => {
                 }
             });
         },
-        [setContextMenu]
+        []
     );
 
     const handleClickOutside = (event) => {
@@ -180,43 +169,11 @@ const DiagramArea = () => {
         };
     }, []);
 
-
-    const onNodeDoubleClick = (event, node) => {
-        setEditingNode(node);
-        setNodeLabel(node.data.label);
-    };
-
-    const handleLabelChange = (event) => {
-        setNodeLabel(event.target.value);
-    };
-
-    const handleLabelSave = () => {
-        setNodes((nodes) =>
-            nodes.map((node) => {
-                if (node.id === editingNode.id) {
-                    node.data = { ...node.data, label: nodeLabel };
-                }
-                return node;
-            })
-        );
-        setEditingNode(null);
-    };
-
     const handleChangeStatus = (nodeId, status) => {
         setNodes((nodes) =>
             nodes.map((node) => {
                 if (node.id === nodeId) {
-                    const updatedNode = { ...node, data: { ...node.data, status } };
-                    setFinalNodeChanges((prev) => {
-                        const nodeIndex = prev.findIndex((n) => n.id === nodeId);
-                        if (nodeIndex > -1) {
-                            prev[nodeIndex] = updatedNode;
-                        } else {
-                            prev.push({ ...updatedNode, isUpdated: true });
-                        }
-                        return [...prev];
-                    });
-                    return updatedNode;
+                    return { ...node, data: { ...node.data, status } };
                 }
                 return node;
             })
@@ -224,41 +181,33 @@ const DiagramArea = () => {
         setContextMenu({ visible: false, position: { x: 0, y: 0 }, nodeId: null });
     };
 
-
-
-
-
     return (
-        <div className="diagram-container" ref={diagramRef}>
-            <ReactFlow
-                nodes={nodes}
-                edges={edges}
-                onNodesChange={onNodesChange}
-                onEdgesChange={onEdgesChange}
-                onConnect={onConnect}
-                onNodeContextMenu={onNodeContextMenu}
-                nodeTypes={nodeTypes}
-                onNodeDoubleClick={onNodeDoubleClick}
-                //style={{ width: '100%', height: '100%' }}
-                fitView
-            >
-                <MiniMap />
-                <Controls />
-                <Background />
-                {contextMenu.visible && (
-                    <NodeContextMenu
-                        id={contextMenu.nodeId}
-                        top={contextMenu.position.y}
-                        left={contextMenu.position.x}
-                        onChangeStatus={handleChangeStatus}
-                        ref={contextMenuRef} // Pass the ref to NodeContextMenu
-                    />
-                )}
-            </ReactFlow>
-        </div>
-        );
-
-
+            <div className="diagram-container" ref={diagramRef}>
+                <ReactFlow
+                    nodes={nodes}
+                    edges={edges}
+                    onNodesChange={handleNodesChange}
+                    onEdgesChange={handleEdgesChange}
+                    onConnect={onConnect}
+                    onNodeContextMenu={onNodeContextMenu}
+                    nodeTypes={nodeTypes}
+                    fitView
+                >
+                    <MiniMap />
+                    <Controls />
+                    <Background />
+                    {contextMenu.visible && (
+                        <NodeContextMenu
+                            id={contextMenu.nodeId}
+                            top={contextMenu.position.y}
+                            left={contextMenu.position.x}
+                            onChangeStatus={handleChangeStatus}
+                            ref={contextMenuRef}
+                        />
+                    )}
+                </ReactFlow>
+            </div>
+    );
 };
 
 export default DiagramArea;
