@@ -1,5 +1,5 @@
 import { memo, useEffect, useState } from 'react';
-import { Handle, Position, NodeResizer, useUpdateNodeInternals } from 'reactflow';
+import {Handle, Position, NodeResizer, useUpdateNodeInternals, useNodesState, useReactFlow} from 'reactflow';
 import FunctionPopup from './FunctionPopup';
 import '../css/CustomNode.css';
 
@@ -8,21 +8,27 @@ const CustomNode = ({ data, id, selected }) => {
     const [showPopup, setShowPopup] = useState(false);
     const [selectedFunction, setSelectedFunction] = useState(null);
     const updateNodeInternals = useUpdateNodeInternals();
+    // const [nodes, setNodes, onNodesChange] = useNodesState([]);
+    const { setNodes } = useReactFlow();
 
+    // Update the internal state of the node to ensure it re-renders correctly
     useEffect(() => {
         updateNodeInternals(id);
-    }, [height, width, id, updateNodeInternals]);
+    }, [data.height, data.width, id, updateNodeInternals]);
 
+    // Handling double-click on Node.Function and opening popup for editing function
     const handleFunctionDoubleClick = (func) => {
         setSelectedFunction(func);
         setShowPopup(true);
     };
 
+    // Closing popup
     const closePopup = () => {
         setShowPopup(false);
         setSelectedFunction(null);
     };
 
+    // Rendering functions depending on status
     const renderFunction = (func) => {
         let icon = '';
         let color = '';
@@ -54,6 +60,7 @@ const CustomNode = ({ data, id, selected }) => {
         );
     };
 
+    // Painting node's border depending on status
     const getBorderColor = (status) => {
         switch (status) {
             case 'new':
@@ -69,16 +76,27 @@ const CustomNode = ({ data, id, selected }) => {
         }
     };
 
+    // Handle resizing to save it
+    const onResizeHandler = (event, { width: newWidth, height: newHeight }) => {
+        setNodes((nodes) =>
+            nodes.map((node) =>
+                node.id === id ? { ...node, width: newWidth, height: newHeight } : node
+            )
+        );
+        updateNodeInternals(id);
+    };
+
     return (
-        <div className="custom-node" style={{ borderColor: getBorderColor(status), width, height }}>
+        <div className="custom-node" style={{ borderColor: getBorderColor(data.status), width: width || 150, height: height || 150 }}>
             <NodeResizer
                 color="#ff0071"
                 isVisible={selected}
+                onResize={(event, { width: newWidth, height: newHeight }) => setNodes((prevNodes) => prevNodes.map(node => node.id === id ? { ...node, data: { ...node.data, width: newWidth, height: newHeight } } : node))}
                 minWidth={100}
                 minHeight={30}
             />
             <div className="ml-2">
-                <div className="text-lg font-bold">{data.label}</div>
+                <div className="text-lg font-bold">{label}</div>
                 <div className="custom-node-body">
                     {functions.map(renderFunction)}
                 </div>

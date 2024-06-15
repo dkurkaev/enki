@@ -1,19 +1,33 @@
 .custom-node {
-    background: white;
-    box-sizing: border-box;
-    padding: 10px;
+    /*width: 300px;*/
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    background-color: #fff;
+    transition: transform 0.3s;
 }
 
 .custom-node-header {
-    font-weight: bold;
+    height: 4px;
+    background-color: #ff0071; /* Change this color to whatever you need */
+}
+
+.custom-node-content {
+    padding: 20px;
+    text-align: center;
+}
+
+.custom-node-content h2 {
+    font-size: 24px;
     margin-bottom: 10px;
+    font-weight: bold;
+    color: #333;
 }
 
-.custom-node-body {
-    display: flex;
-    flex-direction: column;
-}
-
-.custom-node-body div {
-    margin: 2px 0;
+.custom-node-content p {
+    font-size: 16px;
+    /*color: #666;*/
+    line-height: 1.5;
+    margin-bottom: 20px;
 }
