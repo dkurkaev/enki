@@ -1,7 +1,7 @@
 import React from 'react';
 import { useReactFlow } from 'reactflow';
 
-const AddNodeButton = ({ setAddedNodes }) => {
+const AddNodeButton = () => {
     const { setNodes } = useReactFlow();
 
     const addNode = () => {
@@ -24,7 +24,6 @@ const AddNodeButton = ({ setAddedNodes }) => {
         };
 
         setNodes((prevNodes) => [...prevNodes, newNode]);
-        setAddedNodes((prev) => [...prev, newNode]);
     };
 
     return <button onClick={addNode}>Add Node</button>;

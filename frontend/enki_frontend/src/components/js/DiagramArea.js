@@ -16,6 +16,7 @@ import '../css/DiagramArea.css';
 import '../css/NodeContextMenu.css';
 import NodeContextMenu from './NodeContextMenu';
 import CustomNode from './CustomNode';
+import FetchElements from "./FetchElements";
 
 const nodeTypes = {
     custom: CustomNode,
@@ -35,8 +36,7 @@ const DiagramArea = ({
                          deletedEdges,
                          setDeletedEdges,
                      }) => {
-    const [nodes, setNodes, onNodesChange] = useNodesState([]);
-    const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+    const { nodes, setNodes, edges, setEdges } = FetchElements();
     const { setViewport } = useReactFlow();
     const [contextMenu, setContextMenu] = useState({ visible: false, position: { x: 0, y: 0 }, nodeId: null });
     const diagramRef = useRef(null);
@@ -46,28 +46,6 @@ const DiagramArea = ({
         setNodes((nodes) => nodes.map((node) => node.id === id ? { ...node, width: newWidth, height: newHeight } : node));
         setUpdatedNodes((prev) => [...prev, { id, width: newWidth, height: newHeight }]);
     };
-
-    useEffect(() => {
-        const fetchElements = async () => {
-            const [fetchedNodes, fetchedEdges] = await Promise.all([fetchNodes(), fetchEdges()]);
-
-            const nodesWithSize = fetchedNodes.map(node => ({
-                ...node,
-                width: node.width || 150,
-                height: node.height || 150,
-            }));
-
-            setNodes(nodesWithSize);
-            setEdges(fetchedEdges);
-
-            console.log("Fetchez sizez:")
-            console.log(nodesWithSize)
-
-            setViewport({ x: 0, y: 0, zoom: 1 }); // Reset viewport to default on load
-        };
-
-        fetchElements();
-    }, [setNodes, setEdges, setViewport]);
 
     const onConnect = (params) => {
         const newEdge = {

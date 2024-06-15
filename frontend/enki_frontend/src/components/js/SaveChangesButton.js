@@ -1,55 +1,81 @@
-import React, { useCallback } from 'react';
-import { useReactFlow } from 'reactflow';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useReactFlow, useNodesState, useEdgesState } from 'reactflow';
 import { createNode, updateNode, deleteNode, createEdge, updateEdge, deleteEdge, fetchNodes, fetchEdges } from '../../api';
 
-const SaveChangesButton = ({
-                               addedNodes,
-                               setAddedNodes,
-                               updatedNodes,
-                               setUpdatedNodes,
-                               deletedNodes,
-                               setDeletedNodes,
-                               addedEdges,
-                               setAddedEdges,
-                               updatedEdges,
-                               setUpdatedEdges,
-                               deletedEdges,
-                               setDeletedEdges,
-                           }) => {
+const SaveChangesButton = () => {
     const { getNodes, getEdges, setNodes, setEdges } = useReactFlow();
+    const [initialNodes, setInitialNodes] = useState([]);
+    const [initialEdges, setInitialEdges] = useState([]);
+    const [nodes, , onNodesChange] = useNodesState([]);
+    const [edges, , onEdgesChange] = useEdgesState([]);
+
+    useEffect(() => {
+        const fetchInitialData = async () => {
+            const fetchedNodes = await fetchNodes();
+            const fetchedEdges = await fetchEdges();
+
+            const nodesWithSize = fetchedNodes.map(node => ({
+                ...node,
+                width: node.width || 150,
+                height: node.height || 150,
+            }));
+
+            setInitialNodes(nodesWithSize);
+            setInitialEdges(fetchedEdges);
+            setNodes(nodesWithSize);
+            setEdges(fetchedEdges);
+        };
+
+        fetchInitialData();
+    }, [setNodes, setEdges]);
 
     const saveChanges = useCallback(async () => {
-        const nodes = getNodes();
-        const edges = getEdges();
+        const currentNodes = getNodes();
+        const currentEdges = getEdges();
+
+        const addedNodes = currentNodes.filter(node => !initialNodes.some(n => n.id === node.id));
+        const updatedNodes = currentNodes.filter(node => initialNodes.some(n => n.id === node.id && (n.position !== node.position || n.data !== node.data)));
+        const deletedNodes = initialNodes.filter(node => !currentNodes.some(n => n.id === node.id));
+
+        const addedEdges = currentEdges.filter(edge => !initialEdges.some(e => e.id === edge.id));
+        const updatedEdges = currentEdges.filter(edge => initialEdges.some(e => e.id === edge.id && (e.source !== edge.source || e.target !== edge.target || e.data !== edge.data)));
+        const deletedEdges = initialEdges.filter(edge => !currentEdges.some(e => e.id === edge.id));
+
+        // Ensure all edges include the required fields
+        const ensureEdgeFields = (edge) => ({
+            ...edge,
+            animated: edge.animated || false, // Default to false if not provided
+        });
 
         try {
-            // Process node changes
-            for (const node of nodes) {
-                if (addedNodes.some(n => n.id === node.id)) {
-                    await createNode(node);
-                } else {
-                    await updateNode(node.id, node);
-                }
+            // Process added nodes
+            for (const node of addedNodes) {
+                await createNode(node);
+            }
+
+            // Process updated nodes
+            for (const node of updatedNodes) {
+                await updateNode(node.id, node);
+            }
+
+            // Process deleted nodes
+            for (const node of deletedNodes) {
+                await deleteNode(node.id);
             }
 
             // Process added edges
             for (const edge of addedEdges) {
-                await createEdge(edge);
+                await createEdge(ensureEdgeFields(edge));
             }
 
             // Process updated edges
             for (const edge of updatedEdges) {
-                await updateEdge(edge.id, edge);
+                await updateEdge(edge.id, ensureEdgeFields(edge));
             }
 
             // Process deleted edges
-            for (const edgeId of deletedEdges) {
-                await deleteEdge(edgeId);
-            }
-
-            // Process deleted nodes
-            for (const nodeId of deletedNodes) {
-                await deleteNode(nodeId);
+            for (const edge of deletedEdges) {
+                await deleteEdge(edge.id);
             }
 
             // Fetch updated nodes and edges from backend
@@ -58,24 +84,19 @@ const SaveChangesButton = ({
 
             const nodesWithSize = fetchedNodes.map(node => ({
                 ...node,
-                width: node.width || 150, // Default width if not available
-                height: node.height || 150, // Default height if not available
+                width: node.width || 150,
+                height: node.height || 150,
             }));
 
+            setInitialNodes(nodesWithSize);
+            setInitialEdges(fetchedEdges);
             setNodes(nodesWithSize);
             setEdges(fetchedEdges);
-            setAddedNodes([]); // Clear added nodes after saving
-            setUpdatedNodes([]); // Clear updated nodes after saving
-            setDeletedNodes([]); // Clear deleted nodes after saving
-            setAddedEdges([]); // Clear added edges after saving
-            setUpdatedEdges([]); // Clear updated edges after saving
-            setDeletedEdges([]); // Clear deleted edges after saving
-
         } catch (error) {
             console.error('Error saving changes:', error);
             console.error('Error details:', error.response?.data);
         }
-    }, [getNodes, getEdges, setNodes, setEdges, addedNodes, updatedNodes, deletedNodes, addedEdges, updatedEdges, deletedEdges]);
+    }, [getNodes, getEdges, setNodes, setEdges, initialNodes, initialEdges]);
 
     return <button onClick={saveChanges}>Save Changes</button>;
 };
