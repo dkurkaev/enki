@@ -124,7 +124,7 @@ const Flow = () => {
                         <Controls />
                         <Background />
                     </ReactFlow>
-                    <Sidebar nodes={nodes} setNodes={setNodes} hidden={!sidebarVisible} />
+                    <Sidebar nodes={nodes} setNodes={setNodes} onNodesChange={onNodesChange} hidden={!sidebarVisible} />
                     {contextMenu.visible && (
                         <NodeContextMenu
                             id={contextMenu.nodeId}

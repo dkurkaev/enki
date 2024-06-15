@@ -1,9 +1,11 @@
 import React, { useCallback } from 'react';
 import { useStore } from 'reactflow';
+import NodeUpdate from './NodeUpdate';
+
 
 const transformSelector = (state) => state.transform;
 
-export default ({ nodes, setNodes, hidden }) => {
+export default ({ nodes, setNodes, onNodesChange, hidden }) => {
     const transform = useStore(transformSelector);
 
     const selectAll = useCallback(() => {
@@ -17,23 +19,25 @@ export default ({ nodes, setNodes, hidden }) => {
 
     return (
         <aside className={`sidebar ${hidden ? 'hidden-sidebar' : ''}`}>
-            <div className="description">
-                This is an example of how you can access the internal state outside of the ReactFlow component.
-            </div>
-            <div className="title">Zoom & pan transform</div>
-            <div className="transform">
-                [{transform[0].toFixed(2)}, {transform[1].toFixed(2)}, {transform[2].toFixed(2)}]
-            </div>
-            <div className="title">Nodes</div>
-            {nodes.map((node) => (
-                <div className="node" key={node.id}>
-                    Node {node.id} - x: {node.position.x.toFixed(2)}, y: {node.position.y.toFixed(2)}
-                </div>
-            ))}
 
-            <div className="selectall">
-                <button onClick={selectAll}>Select all nodes</button>
-            </div>
+            <NodeUpdate nodes={nodes} setNodes={setNodes} onNodesChange={onNodesChange} />
+            {/*<div className="description">*/}
+            {/*    This is an example of how you can access the internal state outside of the ReactFlow component.*/}
+            {/*</div>*/}
+            {/*<div className="title">Zoom & pan transform</div>*/}
+            {/*<div className="transform">*/}
+            {/*    [{transform[0].toFixed(2)}, {transform[1].toFixed(2)}, {transform[2].toFixed(2)}]*/}
+            {/*</div>*/}
+            {/*<div className="title">Nodes</div>*/}
+            {/*{nodes.map((node) => (*/}
+            {/*    <div className="node" key={node.id}>*/}
+            {/*        Node {node.id} - x: {node.position.x.toFixed(2)}, y: {node.position.y.toFixed(2)}*/}
+            {/*    </div>*/}
+            {/*))}*/}
+
+            {/*<div className="selectall">*/}
+            {/*    <button onClick={selectAll}>Select all nodes</button>*/}
+            {/*</div>*/}
         </aside>
     );
 };
