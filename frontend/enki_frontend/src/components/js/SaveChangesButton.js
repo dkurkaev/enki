@@ -1,74 +1,56 @@
-import React, { useContext } from 'react';
-import { DiagramContext } from './DiagramArea';
-import { createNode, updateNode, deleteNode, createEdge, deleteEdge, fetchNodes, fetchEdges } from '../../api';
+import React, { useCallback } from 'react';
+import { useReactFlow } from 'reactflow';
+import { createNode, updateNode, deleteNode, createEdge, updateEdge, deleteEdge, fetchNodes, fetchEdges } from '../../api';
 
-const SaveChangesButton = () => {
-    const { finalNodeChanges, finalEdgeChanges, setFinalNodeChanges, setFinalEdgeChanges, setNodes, setEdges } = useContext(DiagramContext);
+const SaveChangesButton = ({
+                               addedNodes,
+                               setAddedNodes,
+                               updatedNodes,
+                               setUpdatedNodes,
+                               deletedNodes,
+                               setDeletedNodes,
+                               addedEdges,
+                               setAddedEdges,
+                               updatedEdges,
+                               setUpdatedEdges,
+                               deletedEdges,
+                               setDeletedEdges,
+                           }) => {
+    const { getNodes, getEdges, setNodes, setEdges } = useReactFlow();
 
-    const saveChanges = async () => {
+    const saveChanges = useCallback(async () => {
+        const nodes = getNodes();
+        const edges = getEdges();
+
         try {
-            console.log("Final Node Changes:", finalNodeChanges);
-            console.log("Final Edge Changes:", finalEdgeChanges);
-
-// Process node changes
-            for (const node of finalNodeChanges) {
-                if (node && node.id) {
-                    switch (true) {
-                        case (node.type === 'remove'):
-                            await deleteNode(node.id);
-                            console.log("Node removed:", node); // Debug message
-                            break
-                        case node.isNew:
-                            await createNode({...node, isNew: undefined});
-                            console.log("Node added:", node); // Debug message
-                            break;
-
-                        default:
-                            await updateNode(node.id, node);
-                            console.log("Node updated:", node); // Debug message
-                            break;
-                    }
-                }
-            }
-           /* for (const node of finalNodeChanges) {
-                if (node && node.id) {
-                    if (node.type === 'remove') {
-                        await deleteNode(node.id);
-                        console.log("Node removed:", node); // Debug message
-                    } else if (node.type === 'add') {
-                        const { type, ...nodePayload } = node; // Remove type before sending
-                        await createNode(nodePayload);
-                        console.log("Node added:", node); // Debug message
-                    } else if (node.type === 'update') {
-                        await updateNode(node.id, node);
-                        console.log("Node updated:", node); // Debug message
-                    }
-                }
-            } */
-
-
-// Process edge changes
-            for (const edge of finalEdgeChanges) {
-                if (edge && edge.id) {
-                    switch (true) {
-                        case edge.isNew:
-                            await createEdge({...edge, isNew: undefined, markerEnd: undefined});
-                            break;
-                        case 'remove':
-                            await deleteEdge(edge.id);
-                            console.log("Edge removed:", edge); // Debug message
-                            break;
-                        default:
-                            await deleteEdge(edge.id);
-                            break;
-                    }
+            // Process node changes
+            for (const node of nodes) {
+                if (addedNodes.some(n => n.id === node.id)) {
+                    await createNode(node);
+                } else {
+                    await updateNode(node.id, node);
                 }
             }
 
+            // Process added edges
+            for (const edge of addedEdges) {
+                await createEdge(edge);
+            }
 
-            // Clear changes after successful save
-            setFinalNodeChanges([]);
-            setFinalEdgeChanges([]);
+            // Process updated edges
+            for (const edge of updatedEdges) {
+                await updateEdge(edge.id, edge);
+            }
+
+            // Process deleted edges
+            for (const edgeId of deletedEdges) {
+                await deleteEdge(edgeId);
+            }
+
+            // Process deleted nodes
+            for (const nodeId of deletedNodes) {
+                await deleteNode(nodeId);
+            }
 
             // Fetch updated nodes and edges from backend
             const fetchedNodes = await fetchNodes();
@@ -76,22 +58,24 @@ const SaveChangesButton = () => {
 
             const nodesWithSize = fetchedNodes.map(node => ({
                 ...node,
-                data: {
-                    ...node.data,
-                    width: node.width || 150, // default width if not available
-                    height: node.height || 150, // default height if not available
-                }
+                width: node.width || 150, // Default width if not available
+                height: node.height || 150, // Default height if not available
             }));
 
             setNodes(nodesWithSize);
             setEdges(fetchedEdges);
+            setAddedNodes([]); // Clear added nodes after saving
+            setUpdatedNodes([]); // Clear updated nodes after saving
+            setDeletedNodes([]); // Clear deleted nodes after saving
+            setAddedEdges([]); // Clear added edges after saving
+            setUpdatedEdges([]); // Clear updated edges after saving
+            setDeletedEdges([]); // Clear deleted edges after saving
 
-            console.log('Changes saved successfully!');
         } catch (error) {
             console.error('Error saving changes:', error);
-            console.error('Error details:', error.response?.data); // Log detailed error response
+            console.error('Error details:', error.response?.data);
         }
-    };
+    }, [getNodes, getEdges, setNodes, setEdges, addedNodes, updatedNodes, deletedNodes, addedEdges, updatedEdges, deletedEdges]);
 
     return <button onClick={saveChanges}>Save Changes</button>;
 };

@@ -1,9 +1,9 @@
-import React, { useState, useContext } from 'react';
-import { DiagramContext } from './DiagramArea';
+import React, { useState } from 'react';
+import { useReactFlow } from 'reactflow';
 import '../css/FunctionPopup.css';
 
 const FunctionPopup = ({ functionData, nodeId, onClose }) => {
-    const { setNodes, setFinalNodeChanges } = useContext(DiagramContext);
+    const { getNode, setNodes } = useReactFlow();
     const [status, setStatus] = useState(functionData.status);
     const [name, setName] = useState(functionData.name);
 
@@ -21,11 +21,6 @@ const FunctionPopup = ({ functionData, nodeId, onClose }) => {
                             functions: updatedFunctions,
                         },
                     };
-                    // Update finalNodeChanges with the modified node
-                    setFinalNodeChanges((prev) => {
-                        const updated = prev.filter(n => n.id !== updatedNode.id);
-                        return [...updated, updatedNode];
-                    });
                     return updatedNode;
                 }
                 return node;
