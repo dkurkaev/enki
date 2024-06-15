@@ -1,31 +1,32 @@
 import React, { useCallback } from 'react';
-import { useReactFlow } from 'reactflow';
-import '../css/NodeContextMenu.css'
+import { useReactFlow, useNodesState } from 'reactflow';
+import '../css/NodeContextMenu.css';
 
-const NodeContextMenu = React.forwardRef(({ id, top, left, right, bottom, onChangeStatus }, ref) => {
-    const { getNode, setNodes, setEdges } = useReactFlow();
+const NodeContextMenu = React.forwardRef(({ id, top, left, onChangeStatus }, ref) => {
+    const { getNode, setEdges } = useReactFlow();
+    const [nodes, setNodes] = useNodesState();
 
-    const duplicateNode = useCallback(() => {
-        const node = getNode(id);
-        const position = {
-            x: node.position.x + 50,
-            y: node.position.y + 50,
-        };
-
-        setNodes((nodes) => [
-            ...nodes,
-            {
-                ...node,
-                id: `${node.id}-copy`,
-                position,
-            },
-        ]);
-    }, [id, getNode, setNodes]);
-
-    const deleteNode = useCallback(() => {
-        setNodes((nodes) => nodes.filter((node) => node.id !== id));
-        setEdges((edges) => edges.filter((edge) => edge.source !== id && edge.target !== id));
-    }, [id, setNodes, setEdges]);
+    // const duplicateNode = useCallback(() => {
+    //     const node = getNode(id);
+    //     const position = {
+    //         x: node.position.x + 50,
+    //         y: node.position.y + 50,
+    //     };
+    //
+    //     setNodes((nds) => [
+    //         ...nds,
+    //         {
+    //             ...node,
+    //             id: `${node.id}-copy`,
+    //             position,
+    //         },
+    //     ]);
+    // }, [id, getNode, setNodes]);
+    //
+    // const deleteNode = useCallback(() => {
+    //     setNodes((nds) => nds.filter((node) => node.id !== id));
+    //     setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
+    // }, [id, setNodes, setEdges]);
 
     return (
         <div

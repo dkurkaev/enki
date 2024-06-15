@@ -3,7 +3,7 @@ import { useStore } from 'reactflow';
 
 const transformSelector = (state) => state.transform;
 
-export default ({ nodes, setNodes }) => {
+export default ({ nodes, setNodes, hidden }) => {
     const transform = useStore(transformSelector);
 
     const selectAll = useCallback(() => {
@@ -16,10 +16,9 @@ export default ({ nodes, setNodes }) => {
     }, [setNodes]);
 
     return (
-        <aside>
+        <aside className={`sidebar ${hidden ? 'hidden-sidebar' : ''}`}>
             <div className="description">
-                This is an example of how you can access the internal state outside of the ReactFlow
-                component.
+                This is an example of how you can access the internal state outside of the ReactFlow component.
             </div>
             <div className="title">Zoom & pan transform</div>
             <div className="transform">
@@ -27,13 +26,13 @@ export default ({ nodes, setNodes }) => {
             </div>
             <div className="title">Nodes</div>
             {nodes.map((node) => (
-                <div key={node.id}>
+                <div className="node" key={node.id}>
                     Node {node.id} - x: {node.position.x.toFixed(2)}, y: {node.position.y.toFixed(2)}
                 </div>
             ))}
 
             <div className="selectall">
-                <button onClick={selectAll}>select all nodes</button>
+                <button onClick={selectAll}>Select all nodes</button>
             </div>
         </aside>
     );
