@@ -34,25 +34,31 @@ def delete_node(request, node_id: str):
     return {"success": True}
 
 
-@router.get("/edges/", response=list[EdgeSchema])
-def list_edges(request):
-    return list(Edge.objects.all())
-
-@router.post("/edges/", response=EdgeSchema)
+@router.post("/edges", response=EdgeSchema)
 def create_edge(request, payload: EdgeSchema):
     edge = Edge.objects.create(**payload.dict())
     return edge
 
-@router.put("/edges/{edge_id}/", response=EdgeSchema)
+@router.put("/edges/{edge_id}", response=EdgeSchema)
 def update_edge(request, edge_id: str, payload: EdgeSchema):
-    edge = get_object_or_404(Edge, id=edge_id)
+    edge = Edge.objects.get(id=edge_id)
     for attr, value in payload.dict().items():
         setattr(edge, attr, value)
     edge.save()
     return edge
 
-@router.delete("/edges/{edge_id}/", response=dict)
+@router.get("/edges", response=List[EdgeSchema])
+def list_edges(request):
+    edges = Edge.objects.all()
+    return edges
+
+@router.get("/edges/{edge_id}", response=EdgeSchema)
+def get_edge(request, edge_id: str):
+    edge = Edge.objects.get(id=edge_id)
+    return edge
+
+@router.delete("/edges/{edge_id}", response={204: None})
 def delete_edge(request, edge_id: str):
-    edge = get_object_or_404(Edge, id=edge_id)
+    edge = Edge.objects.get(id=edge_id)
     edge.delete()
-    return {"success": True}
+    return 204

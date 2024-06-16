@@ -8,26 +8,72 @@
     transition: transform 0.3s;
 }
 
-.custom-node-header {
-    height: 4px;
-    background-color: #ff0071; /* Change this color to whatever you need */
+
+
+.handle-top, .handle-bottom, .handle-left, .handle-right {
+    position: absolute;
+    background-color: teal;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
 }
 
-.custom-node-content {
-    padding: 20px;
-    text-align: center;
+.handle-top-1 {
+    top: -5px;
+    left: 10px;
 }
 
-.custom-node-content h2 {
-    font-size: 24px;
-    margin-bottom: 10px;
-    font-weight: bold;
-    color: #333;
+.handle-top-2 {
+    top: -5px;
+    left: calc(50% - 5px);
 }
 
-.custom-node-content p {
-    font-size: 16px;
-    /*color: #666;*/
-    line-height: 1.5;
-    margin-bottom: 20px;
+.handle-top-3 {
+    top: -5px;
+    right: 10px;
+}
+
+.handle-bottom-1 {
+    bottom: -5px;
+    left: 10px;
+}
+
+.handle-bottom-2 {
+    bottom: -5px;
+    left: calc(50% - 5px);
+}
+
+.handle-bottom-3 {
+    bottom: -5px;
+    right: 10px;
+}
+
+.handle-left-1 {
+    left: -5px;
+    top: 10px;
+}
+
+.handle-left-2 {
+    left: -5px;
+    top: calc(50% - 5px);
+}
+
+.handle-left-3 {
+    left: -5px;
+    bottom: 10px;
+}
+
+.handle-right-1 {
+    right: -5px;
+    top: 10px;
+}
+
+.handle-right-2 {
+    right: -5px;
+    top: calc(50% - 5px);
+}
+
+.handle-right-3 {
+    right: -5px;
+    bottom: 10px;
 }

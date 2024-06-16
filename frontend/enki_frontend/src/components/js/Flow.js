@@ -44,8 +44,14 @@ const Flow = () => {
     }, [loading, initialNodes, initialEdges, setNodes, setEdges, setViewport]);
 
     const onConnect = useCallback(
-        (params) => setEdges((eds) => addEdge(params, eds)),
-        []
+        (params) => {
+            const newEdge = {
+                ...params,
+                id: `${params.source}-${params.sourceHandle}-${params.target}-${params.targetHandle}`
+            };
+            setEdges((eds) => addEdge(newEdge, eds));
+        },
+        [setEdges]
     );
 
     const toggleSidebar = () => {
@@ -119,12 +125,13 @@ const Flow = () => {
                         attributionPosition="top-right"
                         nodeTypes={nodeTypes}
                         className="overview"
+                        connectionMode="loose"
                     >
                         <MiniMap />
                         <Controls />
                         <Background />
                     </ReactFlow>
-                    <Sidebar nodes={nodes} setNodes={setNodes} onNodesChange={onNodesChange} hidden={!sidebarVisible} />
+                    <Sidebar nodes={nodes} setNodes={setNodes} hidden={!sidebarVisible} />
                     {contextMenu.visible && (
                         <NodeContextMenu
                             id={contextMenu.nodeId}

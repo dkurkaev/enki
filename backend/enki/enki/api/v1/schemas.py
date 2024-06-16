@@ -15,4 +15,6 @@ class EdgeSchema(Schema):
     id: str
     source: str
     target: str
+    sourceHandle: str
+    targetHandle: str
     animated: bool

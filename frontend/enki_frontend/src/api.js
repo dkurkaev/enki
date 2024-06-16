@@ -23,7 +23,7 @@ export const createEdge = async (edge) => {
     // Inside the createEdge function in api.js
     //console.log("Creating edge with payload:", edge); // Debug message
 
-    const response = await axios.post(`${API_BASE_PATH}/edges/`, edge).catch(error => {
+    const response = await axios.post(`${API_BASE_PATH}/edges`, edge).catch(error => {
         console.error("Edge creation failed:", error.response?.data);
         throw error;
     });
@@ -31,12 +31,12 @@ export const createEdge = async (edge) => {
 };
 
 export const updateEdge = async (id, edge) => {
-    const response = await axios.put(`${API_BASE_PATH}/edges/${id}/`, edge);
+    const response = await axios.put(`${API_BASE_PATH}/edges/${id}`, edge);
     return response.data;
 };
 
 export const deleteEdge = async (id) => {
-    const response = await axios.delete(`${API_BASE_PATH}/edges/${id}/`);
+    const response = await axios.delete(`${API_BASE_PATH}/edges/${id}`);
     return response.data;
 };
 
@@ -59,7 +59,7 @@ export const fetchNodes = async () => {
 
 export const fetchEdges = async () => {
     console.log("Fetching edges...");
-    const response = await axios.get(`${API_BASE_PATH}/edges/`);
+    const response = await axios.get(`${API_BASE_PATH}/edges`);
     console.log("Edges fetched:", response.data);
     return response.data;
 };

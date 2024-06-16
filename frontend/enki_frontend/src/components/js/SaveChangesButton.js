@@ -69,7 +69,7 @@ const SaveChangesButton = () => {
             }
 
             // Process updated edges
-            for (const edge of updatedEdges) {
+            for ( const edge of updatedEdges) {
                 await updateEdge(edge.id, ensureEdgeFields(edge));
             }
 

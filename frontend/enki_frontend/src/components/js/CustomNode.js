@@ -102,8 +102,22 @@ const CustomNode = ({ data, id, selected }) => {
                 </div>
             </div>
 
-            <Handle type="target" isConnectableStart="true" isConnectableEnd="true" position={Position.Top} className="w-16 !bg-teal-500" />
-            <Handle type="source" isConnectableStart="true" isConnectableEnd="true" position={Position.Bottom} className="w-16 !bg-teal-500" />
+            {/* Add more handles */}
+            <Handle type="source" position={Position.Top} style={{ left: '10%' }} isConnectableStart={true} isConnectableEnd={true} id="top-1" />
+            <Handle type="source" position={Position.Top} style={{ left: '50%' }} isConnectableStart={true} isConnectableEnd={true} id="top-2" />
+            <Handle type="source" position={Position.Top} style={{ left: '90%' }} isConnectableStart={true} isConnectableEnd={true} id="top-3" />
+
+            <Handle type="source" position={Position.Right} style={{ top: '10%' }} isConnectableStart={true} isConnectableEnd={true} id="right-1" />
+            <Handle type="source" position={Position.Right} style={{ top: '50%' }} isConnectableStart={true} isConnectableEnd={true} id="right-2" />
+            <Handle type="source" position={Position.Right} style={{ top: '90%' }} isConnectableStart={true} isConnectableEnd={true} id="right-3" />
+
+            <Handle type="source" position={Position.Bottom} style={{ left: '10%' }} isConnectableStart={true} isConnectableEnd={true} id="bottom-1" />
+            <Handle type="source" position={Position.Bottom} style={{ left: '50%' }} isConnectableStart={true} isConnectableEnd={true} id="bottom-2" />
+            <Handle type="source" position={Position.Bottom} style={{ left: '90%' }} isConnectableStart={true} isConnectableEnd={true} id="bottom-3" />
+
+            <Handle type="source" position={Position.Left} style={{ top: '10%' }} isConnectableStart={true} isConnectableEnd={true} id="left-1" />
+            <Handle type="source" position={Position.Left} style={{ top: '50%' }} isConnectableStart={true} isConnectableEnd={true} id="left-2" />
+            <Handle type="source" position={Position.Left} style={{ top: '90%' }} isConnectableStart={true} isConnectableEnd={true} id="left-3" />
 
             {showPopup && (
                 <FunctionPopup functionData={selectedFunction} nodeId={id} onClose={closePopup} />

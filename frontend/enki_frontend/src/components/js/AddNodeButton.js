@@ -11,7 +11,9 @@ const AddNodeButton = () => {
             data: {
                 label: `node-${+new Date()}`,
                 type: 'system',
-                status: 'delete',
+                status: 'modify',
+                height: 170,
+                width: 220,
                 functions: [
                     { id: `func-${+new Date()}-${Math.floor(Math.random() * 1000000)}`, status: 'new', name: 'Function 1' },
                     { id: `func-${+new Date()}-${Math.floor(Math.random() * 1000000)}`, status: 'modify', name: 'Function 2' },

@@ -13,15 +13,12 @@ class Node(models.Model):
         return self.id
 
 class Edge(models.Model):
-    id = models.CharField(primary_key=True, max_length=100)
-    #source = models.ForeignKey(Node, related_name='source_edges', on_delete=models.CASCADE)
-    #target = models.ForeignKey(Node, related_name='target_edges', on_delete=models.CASCADE)
+    id = models.CharField(max_length=100, primary_key=True)
     source = models.CharField(max_length=100)
     target = models.CharField(max_length=100)
+    sourceHandle = models.CharField(max_length=100, null=True, blank=True)
+    targetHandle = models.CharField(max_length=100, null=True, blank=True)
     animated = models.BooleanField(default=False)
-
-    #class Meta:
-        #unique_together = ('source', 'target')
 
     def __str__(self):
         return self.id
