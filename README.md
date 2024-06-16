@@ -1,3 +1,3 @@
 # enki
 
-Tool for cheating EA/SA diagrams using EA repository.
+Tool for creating EA/SA diagrams using EA repository.
