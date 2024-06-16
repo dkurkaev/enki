@@ -1,5 +1,7 @@
 # Django exclusions
-backend/enki/env/
+backend/env/
+backend/venv/
+
 backend/enki/__pycache__/
 backend/enki/*.pyc
 
