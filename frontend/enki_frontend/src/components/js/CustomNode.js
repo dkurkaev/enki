@@ -1,5 +1,5 @@
-import { memo, useEffect, useState } from 'react';
-import {Handle, Position, NodeResizer, useUpdateNodeInternals, useNodesState, useReactFlow} from 'reactflow';
+import { memo, useEffect, useState, useLayoutEffect, useMemo, useRef } from 'react';
+import { Handle, Position, NodeResizer, useUpdateNodeInternals, useNodesState, useReactFlow } from 'reactflow';
 import FunctionPopup from './FunctionPopup';
 import '../css/CustomNode.css';
 
@@ -7,28 +7,58 @@ const CustomNode = ({ data, id, selected }) => {
     const { label, status, functions, height, width } = data;
     const [showPopup, setShowPopup] = useState(false);
     const [selectedFunction, setSelectedFunction] = useState(null);
+    const [targetArrayWidth, setTargetArrayWidth] = useState([]);
+    const [targetArrayHeight, setTargetArrayHeight] = useState([]);
     const updateNodeInternals = useUpdateNodeInternals();
-    // const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const { setNodes } = useReactFlow();
+    const nodeRef = useRef();
 
-    // Update the internal state of the node to ensure it re-renders correctly
+    useLayoutEffect(() => {
+        if (nodeRef.current) {
+            generateHandles(); // Call generateHandles initially
+        }
+    }, [id, width, height]);
+
     useEffect(() => {
         updateNodeInternals(id);
-    }, [data.height, data.width, id, updateNodeInternals]);
+    }, [id, width, height]);
 
-    // Handling double-click on Node.Function and opening popup for editing function
+    const generateHandles = () => {
+        const topBottomHandleCount = Math.floor((width || 150) / 30); // Adjust divisor to control handle density
+        const leftRightHandleCount = Math.floor((height || 150) / 30); // Adjust divisor to control handle density
+
+        const newTargetArrayWidth = Array.from({ length: topBottomHandleCount }, (_, i) => i + 1);
+        const newTargetArrayHeight = Array.from({ length: leftRightHandleCount }, (_, i) => i + 1);
+
+        setTargetArrayWidth(newTargetArrayWidth);
+        setTargetArrayHeight(newTargetArrayHeight);
+    };
+
+    const positionHandle = (index, total) => {
+        return (index / total) * 100 + '%';
+    };
+
+    const DynHandle = ({ position, idx, idPrefix, total }) => (
+        <Handle
+            type="source"
+            position={position}
+            id={`${idPrefix}-${idx}`}
+            style={position === Position.Top || position === Position.Bottom
+                ? { left: positionHandle(idx, total) }
+                : { top: positionHandle(idx, total) }}
+        />
+    );
+
     const handleFunctionDoubleClick = (func) => {
         setSelectedFunction(func);
         setShowPopup(true);
     };
 
-    // Closing popup
     const closePopup = () => {
         setShowPopup(false);
         setSelectedFunction(null);
     };
 
-    // Rendering functions depending on status
     const renderFunction = (func) => {
         let icon = '';
         let color = '';
@@ -60,7 +90,6 @@ const CustomNode = ({ data, id, selected }) => {
         );
     };
 
-    // Painting node's border depending on status
     const getBorderColor = (status) => {
         switch (status) {
             case 'new':
@@ -76,22 +105,36 @@ const CustomNode = ({ data, id, selected }) => {
         }
     };
 
-    // Handle resizing to save it
-    const onResizeHandler = (event, { width: newWidth, height: newHeight }) => {
-        setNodes((nodes) =>
-            nodes.map((node) =>
-                node.id === id ? { ...node, width: newWidth, height: newHeight } : node
-            )
-        );
-        updateNodeInternals(id);
-    };
+    const topHandles = useMemo(() =>
+        targetArrayWidth.map((idx) => (
+            <DynHandle key={`top-${idx}`} position={Position.Top} idx={idx} idPrefix="top" total={targetArrayWidth.length} />
+        )), [targetArrayWidth]);
+
+    const bottomHandles = useMemo(() =>
+        targetArrayWidth.map((idx) => (
+            <DynHandle key={`bottom-${idx}`} position={Position.Bottom} idx={idx} idPrefix="bottom" total={targetArrayWidth.length} />
+        )), [targetArrayWidth]);
+
+    const leftHandles = useMemo(() =>
+        targetArrayHeight.map((idx) => (
+            <DynHandle key={`left-${idx}`} position={Position.Left} idx={idx} idPrefix="left" total={targetArrayHeight.length} />
+        )), [targetArrayHeight]);
+
+    const rightHandles = useMemo(() =>
+        targetArrayHeight.map((idx) => (
+            <DynHandle key={`right-${idx}`} position={Position.Right} idx={idx} idPrefix="right" total={targetArrayHeight.length} />
+        )), [targetArrayHeight]);
+
 
     return (
-        <div className="custom-node" style={{ borderColor: getBorderColor(data.status), width: width || 150, height: height || 150 }}>
+        <div ref={nodeRef} className="custom-node" style={{ borderColor: getBorderColor(data.status), width: width || 150, height: height || 150 }}>
             <NodeResizer
                 color="#ff0071"
                 isVisible={selected}
-                onResize={(event, { width: newWidth, height: newHeight }) => setNodes((prevNodes) => prevNodes.map(node => node.id === id ? { ...node, data: { ...node.data, width: newWidth, height: newHeight } } : node))}
+                onResize={(event, { width: newWidth, height: newHeight }) => {
+                    setNodes((prevNodes) => prevNodes.map(node => node.id === id ? { ...node, data: { ...node.data, width: newWidth, height: newHeight } } : node));
+                    generateHandles(); // Re-generate handles on resize
+                }}
                 minWidth={100}
                 minHeight={30}
             />
@@ -102,22 +145,10 @@ const CustomNode = ({ data, id, selected }) => {
                 </div>
             </div>
 
-            {/* Add more handles */}
-            <Handle type="source" position={Position.Top} style={{ left: '10%' }} isConnectableStart={true} isConnectableEnd={true} id="top-1" />
-            <Handle type="source" position={Position.Top} style={{ left: '50%' }} isConnectableStart={true} isConnectableEnd={true} id="top-2" />
-            <Handle type="source" position={Position.Top} style={{ left: '90%' }} isConnectableStart={true} isConnectableEnd={true} id="top-3" />
-
-            <Handle type="source" position={Position.Right} style={{ top: '10%' }} isConnectableStart={true} isConnectableEnd={true} id="right-1" />
-            <Handle type="source" position={Position.Right} style={{ top: '50%' }} isConnectableStart={true} isConnectableEnd={true} id="right-2" />
-            <Handle type="source" position={Position.Right} style={{ top: '90%' }} isConnectableStart={true} isConnectableEnd={true} id="right-3" />
-
-            <Handle type="source" position={Position.Bottom} style={{ left: '10%' }} isConnectableStart={true} isConnectableEnd={true} id="bottom-1" />
-            <Handle type="source" position={Position.Bottom} style={{ left: '50%' }} isConnectableStart={true} isConnectableEnd={true} id="bottom-2" />
-            <Handle type="source" position={Position.Bottom} style={{ left: '90%' }} isConnectableStart={true} isConnectableEnd={true} id="bottom-3" />
-
-            <Handle type="source" position={Position.Left} style={{ top: '10%' }} isConnectableStart={true} isConnectableEnd={true} id="left-1" />
-            <Handle type="source" position={Position.Left} style={{ top: '50%' }} isConnectableStart={true} isConnectableEnd={true} id="left-2" />
-            <Handle type="source" position={Position.Left} style={{ top: '90%' }} isConnectableStart={true} isConnectableEnd={true} id="left-3" />
+            {topHandles}
+            {bottomHandles}
+            {leftHandles}
+            {rightHandles}
 
             {showPopup && (
                 <FunctionPopup functionData={selectedFunction} nodeId={id} onClose={closePopup} />
