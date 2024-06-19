@@ -44,7 +44,8 @@ const SaveChangesButton = () => {
         // Ensure all edges include the required fields
         const ensureEdgeFields = (edge) => ({
             ...edge,
-            animated: edge.animated || false, // Default to false if not provided
+            animated: edge.animated || false,
+            data: edge.data || { status: 'use', integrations: [] },
         });
 
         try {
@@ -69,7 +70,7 @@ const SaveChangesButton = () => {
             }
 
             // Process updated edges
-            for ( const edge of updatedEdges) {
+            for (const edge of updatedEdges) {
                 await updateEdge(edge.id, ensureEdgeFields(edge));
             }
 

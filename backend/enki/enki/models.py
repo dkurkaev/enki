@@ -14,6 +14,8 @@ class Node(models.Model):
 
 class Edge(models.Model):
     id = models.CharField(max_length=100, primary_key=True)
+    type = models.CharField(max_length=100, default="default")
+    data = models.JSONField(null=True, blank=True)
     source = models.CharField(max_length=100)
     target = models.CharField(max_length=100)
     sourceHandle = models.CharField(max_length=100, null=True, blank=True)

@@ -12,6 +12,8 @@ import ReactFlow, {
 
 import useFetchElements from './FetchElements';
 import CustomNode from './CustomNode';
+import CustomEdge from './CustomEdge';
+
 import AddNodeButton from './AddNodeButton';
 import SaveChangesButton from './SaveChangesButton';
 import Sidebar from './Sidebar';
@@ -23,6 +25,9 @@ import '../css/Overview.css';
 
 const nodeTypes = {
     custom: CustomNode,
+};
+const edgeTypes = {
+    custom: CustomEdge,
 };
 
 const Flow = () => {
@@ -45,10 +50,7 @@ const Flow = () => {
 
     const onConnect = useCallback(
         (params) => {
-            const newEdge = {
-                ...params,
-                id: `${params.source}-${params.sourceHandle}-${params.target}-${params.targetHandle}`
-            };
+            const newEdge = { ...params, type: 'custom', data: { status: 'new', integrations: [] } };
             setEdges((eds) => addEdge(newEdge, eds));
         },
         [setEdges]
@@ -124,6 +126,7 @@ const Flow = () => {
                         fitView
                         attributionPosition="top-right"
                         nodeTypes={nodeTypes}
+                        edgeTypes={edgeTypes}
                         className="overview"
                         connectionMode="loose"
                     >

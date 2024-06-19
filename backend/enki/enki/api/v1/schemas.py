@@ -1,3 +1,5 @@
+from typing import Optional
+
 from ninja import Schema
 
 
@@ -14,6 +16,8 @@ class NodeSchema(Schema):
 class EdgeSchema(Schema):
     id: str
     source: str
+    type: str
+    data: Optional[dict]
     target: str
     sourceHandle: str
     targetHandle: str
