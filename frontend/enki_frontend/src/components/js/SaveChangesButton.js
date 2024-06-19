@@ -1,8 +1,8 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, forwardRef, useImperativeHandle } from 'react';
 import { useReactFlow, useNodesState, useEdgesState } from 'reactflow';
-import { createNode, updateNode, deleteNode, createEdge, updateEdge, deleteEdge, fetchNodes, fetchEdges } from '../../api';
+import { createNode, updateNode, deleteNode, createEdge, updateEdge, deleteEdge, fetchNodes, fetchEdges } from '../../api'; // Adjust import path as necessary
 
-const SaveChangesButton = () => {
+const SaveChangesButton = forwardRef((props, ref) => {
     const { getNodes, getEdges, setNodes, setEdges } = useReactFlow();
     const [initialNodes, setInitialNodes] = useState([]);
     const [initialEdges, setInitialEdges] = useState([]);
@@ -99,7 +99,12 @@ const SaveChangesButton = () => {
         }
     }, [getNodes, getEdges, setNodes, setEdges, initialNodes, initialEdges]);
 
-    return <button onClick={saveChanges}>Save Changes</button>;
-};
+    useImperativeHandle(ref, () => ({
+        saveChanges,
+    }));
+
+    return null;
+
+});
 
 export default SaveChangesButton;

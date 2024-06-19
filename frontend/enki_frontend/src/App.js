@@ -1,15 +1,20 @@
-import React, { useState } from 'react';
+import React, {useRef, useState} from 'react';
 import { ReactFlowProvider } from 'reactflow';
+import { FileAddOutlined, SaveOutlined } from '@ant-design/icons';
+import { FloatButton } from 'antd';
 import './index.css';
 import {
-    DesktopOutlined,
-    FileOutlined,
-    PieChartOutlined, SelectOutlined, SwitcherOutlined,
+    SelectOutlined,
+    SwitcherOutlined,
     TeamOutlined,
-    UserOutlined,
 } from '@ant-design/icons';
 import { Breadcrumb, Layout, Menu, theme } from 'antd';
 import Flow from "./components/js/Flow"; // Import Flow component
+import AddNodeButton from './components/js/AddNodeButton';
+import SaveChangesButton from './components/js/SaveChangesButton';
+import Sidebar from './components/js/Sidebar';
+import logo from './assets/logo.png'
+
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -30,50 +35,102 @@ const items = [
         getItem('Integrations', '5'),
     ]),
     getItem('My clusters', 'sub2', <TeamOutlined />, [getItem('Сontract accounting', '6'), getItem('Funding management', '8')]),
-    // getItem('Files', '9', <FileOutlined />),
 ];
 
 const App = () => {
     const [collapsed, setCollapsed] = useState(false);
+    const addNodeButtonRef = useRef(null);
+    const saveChangesButtonRef = useRef(null);
+    const sidebarRef = useRef(null);
+
     const {
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
+
+    const handleAddNode = () => {
+        if (addNodeButtonRef.current) {
+            addNodeButtonRef.current.addNode();
+        }
+    };
+
+    const handleSaveChanges = () => {
+        if (saveChangesButtonRef.current) {
+            saveChangesButtonRef.current.saveChanges();
+        }
+    };
+
+    const handleToggleSidebar = () => {
+        if (sidebarRef.current) {
+            sidebarRef.current.toggleSidebar();
+        }
+    };
+
     return (
-        <Layout style={{ minHeight: '100vh' }}>
-            <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
-                <div className="demo-logo-vertical" />
-                <Menu theme="dark" defaultSelectedKeys={['1']} mode="inline" items={items} />
-            </Sider>
+        <Layout>
+            <Header className="header">
+
+                <img src={logo} alt="Logo" style={{ height: '35px', marginLeft: '6px', marginRight: '16px' }} />
+
+                <div className="logo" />
+                <Menu
+                    theme="light"
+                    mode="horizontal"
+                    defaultSelectedKeys={['2']}
+                    style={{ lineHeight: '64px' }}
+                >
+                    <Menu.Item key="1">nav 1</Menu.Item>
+                    <Menu.Item key="2">nav 2</Menu.Item>
+                    <Menu.Item key="3">nav 3</Menu.Item>
+                </Menu>
+            </Header>
+
             <Layout>
-                <Header style={{ padding: 0, background: colorBgContainer }} />
-                <Content style={{ margin: '0 16px' }}>
-                    <Breadcrumb style={{ margin: '16px 0' }}>
-                        <Breadcrumb.Item>Diagrams</Breadcrumb.Item>
-                        <Breadcrumb.Item>New Diagram</Breadcrumb.Item>
-                    </Breadcrumb>
-                    <div
-                        style={{
-                            padding: 24,
-                            background: colorBgContainer,
-                            borderRadius: borderRadiusLG,
-                            flex: 1,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            height: 'calc(100vh - 130px)'
-                            // Такая высота, если вставляем футер:
-                            // height: 'calc(100vh - 190px)', // Adjust height to fit header, footer, and breadcrumb
-                        }}
-                    >
-                        <ReactFlowProvider>
-                            <Flow /> {/* Add Flow component here */}
-                        </ReactFlowProvider>
-                    </div>
-                </Content>
-                {/*<Footer style={{ textAlign: 'center' }}>*/}
-                {/*    Enki ©{new Date().getFullYear()} Created by Dmitry Kurkaev*/}
-                {/*</Footer>*/}
+                <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)} theme="light" width={200} style={{ background: colorBgContainer }}>
+                    <Menu
+                        mode="inline"
+                        defaultSelectedKeys={['1']}
+                        defaultOpenKeys={['sub1']}
+                        style={{ height: '100%', borderRight: 0 }}
+                        items={items}
+                    />
+                </Sider>
+                <Layout style={{ padding: '0 24px 24px' }}>
+                    <Content style={{ margin: '0 16px' }}>
+                        <Breadcrumb style={{ margin: '16px 0' }}>
+                            <Breadcrumb.Item>Finances & IT</Breadcrumb.Item>
+                            <Breadcrumb.Item>Сontract accounting</Breadcrumb.Item>
+                            <Breadcrumb.Item>2024 Q3</Breadcrumb.Item>
+
+                        </Breadcrumb>
+
+                        <div
+                            style={{
+                                padding: 24,
+                                background: colorBgContainer,
+                                borderRadius: borderRadiusLG,
+                                flex: 1,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                height: 'calc(100vh - 150px)'
+                            }}
+                        >
+                            <ReactFlowProvider>
+                                <Flow /> {/* Add Flow component here */}
+                                <AddNodeButton ref={addNodeButtonRef} style={{ display: 'none' }} />
+                                <SaveChangesButton ref={saveChangesButtonRef} style={{ display: 'none' }} />
+                            </ReactFlowProvider>
+                            <FloatButton.Group shape="square" style={{ right: 60 }}>
+                                <FloatButton icon={<FileAddOutlined />} onClick={handleAddNode} />
+                                <FloatButton icon={<SaveOutlined />} onClick={handleSaveChanges} />
+                                <FloatButton icon={<SelectOutlined />} onClick={handleToggleSidebar} />
+
+                            </FloatButton.Group>
+                        </div>
+                    </Content>
+                </Layout>
             </Layout>
         </Layout>
+
     );
 };
 

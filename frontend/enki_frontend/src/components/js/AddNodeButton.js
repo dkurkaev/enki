@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { forwardRef, useImperativeHandle } from 'react';
 import { useReactFlow } from 'reactflow';
 
-const AddNodeButton = () => {
+const AddNodeButton = forwardRef((props, ref) => {
     const { setNodes } = useReactFlow();
 
     const addNode = () => {
@@ -28,7 +28,11 @@ const AddNodeButton = () => {
         setNodes((prevNodes) => [...prevNodes, newNode]);
     };
 
-    return <button onClick={addNode}>Add Node</button>;
-};
+    useImperativeHandle(ref, () => ({
+        addNode,
+    }));
+
+    return null;
+});
 
 export default AddNodeButton;

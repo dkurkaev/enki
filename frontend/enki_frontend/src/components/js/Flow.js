@@ -7,7 +7,7 @@ import ReactFlow, {
     useNodesState,
     useEdgesState,
     useReactFlow,
-    ReactFlowProvider,
+    ReactFlowProvider, Position,
 } from 'reactflow';
 
 import useFetchElements from './FetchElements';
@@ -103,17 +103,17 @@ const Flow = () => {
 
     return (
         <div className="reactflow-wrapper" style={{ flex: 1 }}>
-            <div className="header">
-                <div className="header-left">
-                    <SaveChangesButton />
-                    <AddNodeButton />
-                </div>
-                <div className="header-right">
-                    <button onClick={toggleSidebar} className="toggle-sidebar-btn">
-                        {sidebarVisible ? 'Hide Sidebar' : 'Show Sidebar'}
-                    </button>
-                </div>
-            </div>
+            {/*<div className="header">*/}
+            {/*    <div className="header-left">*/}
+            {/*        <SaveChangesButton />*/}
+            {/*        <AddNodeButton />*/}
+            {/*    </div>*/}
+            {/*    <div className="header-right">*/}
+            {/*        <button onClick={toggleSidebar} className="toggle-sidebar-btn">*/}
+            {/*            {sidebarVisible ? 'Hide Sidebar' : 'Show Sidebar'}*/}
+            {/*        </button>*/}
+            {/*    </div>*/}
+            {/*</div>*/}
             <div style={{ flex: 1 }}>
                 <ReactFlow
                     nodes={nodes}
@@ -129,11 +129,11 @@ const Flow = () => {
                     className="overview"
                     connectionMode="loose"
                 >
-                    <MiniMap />
+                    {/*<MiniMap position={Position.Bottom}/>*/}
                     <Controls />
                     <Background />
                 </ReactFlow>
-                <Sidebar nodes={nodes} setNodes={setNodes} hidden={!sidebarVisible} />
+                {/*<Sidebar nodes={nodes} setNodes={setNodes} hidden={!sidebarVisible} />*/}
                 {contextMenu.visible && (
                     <NodeContextMenu
                         id={contextMenu.nodeId}
