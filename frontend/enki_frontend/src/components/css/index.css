@@ -1,12 +1,25 @@
 /* Add these styles to your existing index.css */
 
+html, body {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+
+    background: #fff;
+}
+
+#root {
+    height: 100%;
+}
+
 body, html, .providerflow {
     margin: 0;
     padding: 0;
-    width: 100%;
+    background: #fff;
+    /*width: 100%;*/
     height: 100%;
-    display: flex;
-    flex-direction: column;
+    /*display: flex;*/
+    /*flex-direction: column;*/
 }
 
 .header {
@@ -60,10 +73,10 @@ body, html, .providerflow {
 }
 
 .reactflow-wrapper {
-    flex-grow: 1;
+    height: 100%;
+    /*width: 100%;*/
     display: flex;
-    width: 100%;
-    position: relative;
+    flex-direction: column;
 }
 
 .sidebar {

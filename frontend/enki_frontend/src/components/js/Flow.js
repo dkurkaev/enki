@@ -102,50 +102,48 @@ const Flow = () => {
     };
 
     return (
-        <div className="providerflow">
-            <ReactFlowProvider>
-                <div className="header">
-                    <div className="header-left">
-                        <SaveChangesButton />
-                        <AddNodeButton />
-                    </div>
-                    <div className="header-right">
-                        <button onClick={toggleSidebar} className="toggle-sidebar-btn">
-                            {sidebarVisible ? 'Hide Sidebar' : 'Show Sidebar'}
-                        </button>
-                    </div>
+        <div className="reactflow-wrapper" style={{ flex: 1 }}>
+            <div className="header">
+                <div className="header-left">
+                    <SaveChangesButton />
+                    <AddNodeButton />
                 </div>
-                <div className="reactflow-wrapper">
-                    <ReactFlow
-                        nodes={nodes}
-                        edges={edges}
-                        onNodesChange={onNodesChange}
-                        onEdgesChange={onEdgesChange}
-                        onConnect={onConnect}
-                        onNodeContextMenu={onNodeContextMenu}
-                        fitView
-                        attributionPosition="top-right"
-                        nodeTypes={nodeTypes}
-                        edgeTypes={edgeTypes}
-                        className="overview"
-                        connectionMode="loose"
-                    >
-                        <MiniMap />
-                        <Controls />
-                        <Background />
-                    </ReactFlow>
-                    <Sidebar nodes={nodes} setNodes={setNodes} hidden={!sidebarVisible} />
-                    {contextMenu.visible && (
-                        <NodeContextMenu
-                            id={contextMenu.nodeId}
-                            top={contextMenu.position.y}
-                            left={contextMenu.position.x}
-                            onChangeStatus={handleChangeStatus}
-                            ref={contextMenuRef}
-                        />
-                    )}
+                <div className="header-right">
+                    <button onClick={toggleSidebar} className="toggle-sidebar-btn">
+                        {sidebarVisible ? 'Hide Sidebar' : 'Show Sidebar'}
+                    </button>
                 </div>
-            </ReactFlowProvider>
+            </div>
+            <div style={{ flex: 1 }}>
+                <ReactFlow
+                    nodes={nodes}
+                    edges={edges}
+                    onNodesChange={onNodesChange}
+                    onEdgesChange={onEdgesChange}
+                    onConnect={onConnect}
+                    onNodeContextMenu={onNodeContextMenu}
+                    fitView
+                    attributionPosition="top-right"
+                    nodeTypes={nodeTypes}
+                    edgeTypes={edgeTypes}
+                    className="overview"
+                    connectionMode="loose"
+                >
+                    <MiniMap />
+                    <Controls />
+                    <Background />
+                </ReactFlow>
+                <Sidebar nodes={nodes} setNodes={setNodes} hidden={!sidebarVisible} />
+                {contextMenu.visible && (
+                    <NodeContextMenu
+                        id={contextMenu.nodeId}
+                        top={contextMenu.position.y}
+                        left={contextMenu.position.x}
+                        onChangeStatus={handleChangeStatus}
+                        ref={contextMenuRef}
+                    />
+                )}
+            </div>
         </div>
     );
 };
