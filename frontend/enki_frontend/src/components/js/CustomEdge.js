@@ -1,5 +1,6 @@
 import React, { memo } from 'react';
 import { getSmoothStepPath, EdgeLabelRenderer, EdgeProps } from 'reactflow';
+import EdgeModal from './EdgeModal';
 
 const CustomEdge = ({
                         id,
@@ -12,6 +13,7 @@ const CustomEdge = ({
                         style = {},
                         markerEnd,
                         data,
+                        onDoubleClick,
                     }: EdgeProps) => {
     const [edgePath, labelX, labelY] = getSmoothStepPath({
         sourceX,
@@ -39,31 +41,23 @@ const CustomEdge = ({
 
     const color = getColorByStatus(data?.status);
 
+    const generateLabel = () => {
+        if (!data?.integrations) return '';
+        return data.integrations.map(integration => `${integration.code}: ${integration.name}`).join('\n');
+    };
+
+    const label = generateLabel();
+
     return (
         <>
-            <svg width="0" height="0">
-                <defs>
-                    <marker
-                        id={`arrowhead-${id}`}
-                        viewBox="0 0 10 10"
-                        refX="10"
-                        refY="5"
-                        markerWidth="6"
-                        markerHeight="6"
-                        orient="auto-start-reverse"
-                    >
-                        <path d="M 0 0 L 10 5 L 0 10 z" fill={color} />
-                    </marker>
-                </defs>
-            </svg>
             <path
                 id={id}
                 className="react-flow__edge-path"
                 d={edgePath}
                 style={{ stroke: color }}
-                markerEnd={`url(#arrowhead-${id})`}
+                markerEnd={markerEnd}
+                onDoubleClick={onDoubleClick}
             />
-            {/* Uncomment if you want to render the label */}
             <EdgeLabelRenderer>
                 <div
                     style={{
@@ -73,10 +67,11 @@ const CustomEdge = ({
                         padding: '2px',
                         borderRadius: '3px',
                         fontSize: 12,
-                        pointerEvents: 'all'
+                        whiteSpace: 'pre-line',
+                        pointerEvents: 'all',
                     }}
                 >
-                    {data?.label || 'Label'}
+                    {label}
                 </div>
             </EdgeLabelRenderer>
         </>

@@ -18,6 +18,9 @@ import AddNodeButton from './AddNodeButton';
 import SaveChangesButton from './SaveChangesButton';
 import Sidebar from './Sidebar';
 import NodeContextMenu from './NodeContextMenu';
+import EdgeModal from './EdgeModal';  // Import EdgeModal
+
+
 
 import 'reactflow/dist/style.css';
 import '../css/index.css';
@@ -30,12 +33,18 @@ const edgeTypes = {
     custom: CustomEdge,
 };
 
-const Flow = () => {
+const Flow = ({ setSelectedNode }) => {
     const { nodes: initialNodes, edges: initialEdges, loading } = useFetchElements();
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
     const [sidebarVisible, setSidebarVisible] = useState(false); // Hide sidebar by default
     const [contextMenu, setContextMenu] = useState({ visible: false, position: { x: 0, y: 0 }, nodeId: null });
+    // Add state variables for managing modal visibility and the selected edge
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedEdge, setSelectedEdge] = useState(null);
+    const [selectedNodes, setSelectedNodes] = useState([]);
+
+
 
     const { setViewport } = useReactFlow();
     const contextMenuRef = useRef(null);
@@ -101,6 +110,16 @@ const Flow = () => {
         setContextMenu({ visible: false, position: { x: 0, y: 0 }, nodeId: null });
     };
 
+    const handleEdgeDoubleClick = (event, edge) => {
+        event.preventDefault();
+        setSelectedEdge(edge);
+        setIsModalOpen(true);
+    };
+
+    const handleNodeClick = (event, node) => {
+        setSelectedNode(node);
+    };
+
     return (
         <div className="reactflow-wrapper" style={{ flex: 1 }}>
             {/*<div className="header">*/}
@@ -122,6 +141,10 @@ const Flow = () => {
                     onEdgesChange={onEdgesChange}
                     onConnect={onConnect}
                     onNodeContextMenu={onNodeContextMenu}
+                    onEdgeDoubleClick={handleEdgeDoubleClick}  // Add this line
+                    onNodeClick={handleNodeClick}  // Add this line
+
+
                     fitView
                     attributionPosition="top-right"
                     nodeTypes={nodeTypes}
@@ -141,6 +164,24 @@ const Flow = () => {
                         left={contextMenu.position.x}
                         onChangeStatus={handleChangeStatus}
                         ref={contextMenuRef}
+                    />
+                )}
+                {isModalOpen && (
+                    <EdgeModal
+                        edge={selectedEdge}
+                        isOpen={isModalOpen}
+                        onClose={() => setIsModalOpen(false)}
+                        onSave={(updatedEdge) => {
+                            setEdges((eds) =>
+                                eds.map((e) => (e.id === updatedEdge.id ? updatedEdge : e))
+                            );
+                            setIsModalOpen(false);
+                        }}
+                        updateEdge={(updatedEdge) => {
+                            setEdges((eds) =>
+                                eds.map((e) => (e.id === updatedEdge.id ? updatedEdge : e))
+                            );
+                        }}
                     />
                 )}
             </div>

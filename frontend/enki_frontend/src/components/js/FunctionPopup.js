@@ -1,18 +1,31 @@
 import React, { useState } from 'react';
 import { useReactFlow } from 'reactflow';
+import { Modal, Select, Input, Button } from 'antd';
 import '../css/FunctionPopup.css';
+
+const { Option } = Select;
 
 const FunctionPopup = ({ functionData, nodeId, onClose }) => {
     const { getNode, setNodes } = useReactFlow();
     const [status, setStatus] = useState(functionData.status);
     const [name, setName] = useState(functionData.name);
 
-    const handleSave = () => {
+    const handleStatusChange = (value) => {
+        setStatus(value);
+        updateNodeState(value, name);
+    };
+
+    const handleNameChange = (e) => {
+        setName(e.target.value);
+        updateNodeState(status, e.target.value);
+    };
+
+    const updateNodeState = (newStatus, newName) => {
         setNodes((nodes) =>
             nodes.map((node) => {
                 if (node.id === nodeId) {
                     const updatedFunctions = node.data.functions.map((func) =>
-                        func.id === functionData.id ? { ...func, status, name } : func
+                        func.id === functionData.id ? { ...func, status: newStatus, name: newName } : func
                     );
                     const updatedNode = {
                         ...node,
@@ -26,29 +39,35 @@ const FunctionPopup = ({ functionData, nodeId, onClose }) => {
                 return node;
             })
         );
-        onClose();
     };
 
     return (
-        <div className="popup">
-            <div className="popup-inner">
+        <Modal
+            title="Edit Function"
+            open={true}
+            onCancel={onClose}
+            footer={[
+                <Button key="cancel" onClick={onClose}>
+                    Ok
+                </Button>,
+            ]}
+        >
+            <div className="popup-content">
                 <label>
                     Status:
-                    <select value={status} onChange={(e) => setStatus(e.target.value)}>
-                        <option value="new">New</option>
-                        <option value="modify">Modify</option>
-                        <option value="delete">Delete</option>
-                        <option value="use">Use</option>
-                    </select>
+                    <Select value={status} onChange={handleStatusChange} style={{ width: '100%' }}>
+                        <Option value="new">New</Option>
+                        <Option value="modify">Modify</Option>
+                        <Option value="delete">Delete</Option>
+                        <Option value="use">Use</Option>
+                    </Select>
                 </label>
                 <label>
                     Name:
-                    <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
+                    <Input type="text" value={name} onChange={handleNameChange} />
                 </label>
-                <button onClick={handleSave}>Save</button>
-                <button onClick={onClose}>Cancel</button>
             </div>
-        </div>
+        </Modal>
     );
 };
 

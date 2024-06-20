@@ -1,35 +1,19 @@
-import React, { useCallback, forwardRef, useImperativeHandle, useState } from 'react';
-import { useStore } from 'reactflow';
+import React from 'react';
+import { Drawer } from 'antd';
 import NodeUpdate from './NodeUpdate';
 
-const transformSelector = (state) => state.transform;
-
-const Sidebar = forwardRef(({ nodes, setNodes, onNodesChange, hidden }, ref) => {
-    const transform = useStore(transformSelector);
-    const [visible, setVisible] = useState(!hidden);
-
-    const selectAll = useCallback(() => {
-        setNodes((nds) =>
-            nds.map((node) => {
-                node.selected = true;
-                return node;
-            })
-        );
-    }, [setNodes]);
-
-    const toggleSidebar = () => {
-        setVisible((prev) => !prev);
-    };
-
-    useImperativeHandle(ref, () => ({
-        toggleSidebar,
-    }));
-
+const Sidebar = ({ visible, onClose, nodes, setNodes, onNodesChange }) => {
     return (
-        <aside className={`sidebar ${visible ? '' : 'hidden-sidebar'}`}>
+        <Drawer
+            title="Node Update"
+            placement="right"
+            onClose={onClose}
+            visible={visible}
+            width={300} // Adjust the width as needed
+        >
             <NodeUpdate nodes={nodes} setNodes={setNodes} onNodesChange={onNodesChange} />
-        </aside>
+        </Drawer>
     );
-});
+};
 
 export default Sidebar;
