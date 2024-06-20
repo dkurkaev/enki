@@ -59,6 +59,8 @@ const CustomNode = ({ data, id, selected }) => {
         );
     };
 
+
+
     const getBorderColor = (status) => {
         switch (status) {
             case 'new':

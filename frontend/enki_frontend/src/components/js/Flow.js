@@ -150,6 +150,7 @@ const Flow = ({ setSelectedNode }) => {
                     nodeTypes={nodeTypes}
                     edgeTypes={edgeTypes}
                     className="overview"
+                    zoomOnDoubleClick={false} // Disable zoom on double click
                     connectionMode="loose"
                 >
                     {/*<MiniMap position={Position.Bottom}/>*/}

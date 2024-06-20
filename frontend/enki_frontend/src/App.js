@@ -115,7 +115,7 @@ const App = () => {
                                 <Flow nodes={nodes} setNodes={setNodes} onNodesChange={setNodes} edges={edges} setEdges={setEdges} setSelectedNode={setSelectedNode} />
                                 <AddNodeButton ref={addNodeButtonRef} style={{ display: 'none' }} />
                                 <SaveChangesButton ref={saveChangesButtonRef} style={{ display: 'none' }} />
-                                <NodeEdit ref={nodeEditRef}/> {/* Add NodeEdit component */}
+                                <NodeEdit ref={nodeEditRef} />
                             </ReactFlowProvider>
                             <FloatButton.Group shape="square" style={{ right: 60 }}>
                                 <FloatButton icon={<FileAddOutlined />} onClick={handleAddNode} />
