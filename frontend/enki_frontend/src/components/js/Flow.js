@@ -7,7 +7,8 @@ import ReactFlow, {
     useNodesState,
     useEdgesState,
     useReactFlow,
-    ReactFlowProvider, Position,
+    applyNodeChanges,
+    applyEdgeChanges,
 } from 'reactflow';
 
 import useFetchElements from './FetchElements';
@@ -19,8 +20,6 @@ import SaveChangesButton from './SaveChangesButton';
 import Sidebar from './Sidebar';
 import NodeContextMenu from './NodeContextMenu';
 import EdgeModal from './EdgeModal';  // Import EdgeModal
-
-
 
 import 'reactflow/dist/style.css';
 import '../css/index.css';
@@ -37,14 +36,14 @@ const Flow = ({ setSelectedNode }) => {
     const { nodes: initialNodes, edges: initialEdges, loading } = useFetchElements();
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+    const history = useRef([{ nodes: initialNodes, edges: initialEdges }]);
+    const redoHistory = useRef([]);
     const [sidebarVisible, setSidebarVisible] = useState(false); // Hide sidebar by default
     const [contextMenu, setContextMenu] = useState({ visible: false, position: { x: 0, y: 0 }, nodeId: null });
     // Add state variables for managing modal visibility and the selected edge
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedEdge, setSelectedEdge] = useState(null);
     const [selectedNodes, setSelectedNodes] = useState([]);
-
-
 
     const { setViewport } = useReactFlow();
     const contextMenuRef = useRef(null);
@@ -54,15 +53,21 @@ const Flow = ({ setSelectedNode }) => {
             setNodes(initialNodes);
             setEdges(initialEdges);
             setViewport({ x: 0, y: 0, zoom: 1 }); // Reset viewport to default on load
+            history.current = [{ nodes: initialNodes, edges: initialEdges }]; // Initialize history
         }
     }, [loading, initialNodes, initialEdges, setNodes, setEdges, setViewport]);
 
     const onConnect = useCallback(
         (params) => {
             const newEdge = { ...params, type: 'custom', data: { status: 'new', integrations: [] } };
-            setEdges((eds) => addEdge(newEdge, eds));
+            setEdges((eds) => {
+                const updatedEdges = addEdge(newEdge, eds);
+                history.current.push({ nodes, edges: updatedEdges });
+                redoHistory.current = [];
+                return updatedEdges;
+            });
         },
-        [setEdges]
+        [setEdges, nodes, edges]
     );
 
     const toggleSidebar = () => {
@@ -93,21 +98,24 @@ const Flow = ({ setSelectedNode }) => {
 
     useEffect(() => {
         document.addEventListener('click', handleClickOutside);
+        document.addEventListener('keydown', handleKeyDown);
         return () => {
             document.removeEventListener('click', handleClickOutside);
+            document.removeEventListener('keydown', handleKeyDown);
         };
-    }, []);
+    }, [nodes, edges, history, redoHistory]);
 
     const handleChangeStatus = (nodeId, status) => {
-        setNodes((nds) =>
-            nds.map((node) => {
-                if (node.id === nodeId) {
-                    return { ...node, data: { ...node.data, status } };
-                }
-                return node;
-            })
-        );
+        const updatedNodes = nodes.map((node) => {
+            if (node.id === nodeId) {
+                return { ...node, data: { ...node.data, status } };
+            }
+            return node;
+        });
+        setNodes(updatedNodes);
         setContextMenu({ visible: false, position: { x: 0, y: 0 }, nodeId: null });
+        history.current.push({ nodes: updatedNodes, edges });
+        redoHistory.current = [];
     };
 
     const handleEdgeDoubleClick = (event, edge) => {
@@ -120,44 +128,89 @@ const Flow = ({ setSelectedNode }) => {
         setSelectedNode(node);
     };
 
+    const handleUndo = () => {
+        if (history.current.length <= 1) return; // Prevent undoing the initial state
+
+        const lastState = history.current[history.current.length - 2];
+        redoHistory.current.unshift(history.current.pop());
+        setNodes(lastState.nodes);
+        setEdges(lastState.edges);
+    };
+
+    const handleRedo = () => {
+        if (redoHistory.current.length === 0) return;
+
+        const nextState = redoHistory.current.shift();
+        history.current.push(nextState);
+        setNodes(nextState.nodes);
+        setEdges(nextState.edges);
+    };
+
+    const handleKeyDown = (event) => {
+        if ((event.ctrlKey || event.metaKey) && event.key === 'z' && !event.shiftKey) {
+            event.preventDefault();
+            handleUndo();
+        } else if (((event.ctrlKey || event.metaKey) && event.key === 'y') || ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'z')) {
+            event.preventDefault();
+            handleRedo();
+        }
+    };
+
+    const handleNodesChange = (changes) => {
+        setNodes((nds) => applyNodeChanges(changes, nds));
+    };
+
+    const handleNodesDragStop = (event, node) => {
+        setNodes((nds) => {
+            const updatedNodes = nds.map((n) => (n.id === node.id ? node : n));
+            history.current.push({ nodes: updatedNodes, edges });
+            redoHistory.current = [];
+            return updatedNodes;
+        });
+    };
+
+    const handleNodeResizeStop = (event, node) => {
+        setNodes((nds) => {
+            const updatedNodes = nds.map((n) => (n.id === node.id ? node : n));
+            history.current.push({ nodes: updatedNodes, edges });
+            redoHistory.current = [];
+            return updatedNodes;
+        });
+    };
+
+    const handleEdgesChange = (changes) => {
+        setEdges((eds) => {
+            const updatedEdges = applyEdgeChanges(changes, eds);
+            history.current.push({ nodes, edges: updatedEdges });
+            redoHistory.current = [];
+            return updatedEdges;
+        });
+    };
+
     return (
         <div className="reactflow-wrapper" style={{ flex: 1 }}>
-            {/*<div className="header">*/}
-            {/*    <div className="header-left">*/}
-            {/*        <SaveChangesButton />*/}
-            {/*        <AddNodeButton />*/}
-            {/*    </div>*/}
-            {/*    <div className="header-right">*/}
-            {/*        <button onClick={toggleSidebar} className="toggle-sidebar-btn">*/}
-            {/*            {sidebarVisible ? 'Hide Sidebar' : 'Show Sidebar'}*/}
-            {/*        </button>*/}
-            {/*    </div>*/}
-            {/*</div>*/}
             <div style={{ flex: 1 }}>
                 <ReactFlow
                     nodes={nodes}
                     edges={edges}
-                    onNodesChange={onNodesChange}
-                    onEdgesChange={onEdgesChange}
+                    onNodesChange={handleNodesChange}
+                    onNodesDragStop={handleNodesDragStop}
+                    onNodeResizeStop={handleNodeResizeStop}
+                    onEdgesChange={handleEdgesChange}
                     onConnect={onConnect}
                     onNodeContextMenu={onNodeContextMenu}
-                    onEdgeDoubleClick={handleEdgeDoubleClick}  // Add this line
-                    onNodeClick={handleNodeClick}  // Add this line
-
-
+                    onEdgeDoubleClick={handleEdgeDoubleClick}
+                    onNodeClick={handleNodeClick}
                     fitView
                     attributionPosition="top-right"
                     nodeTypes={nodeTypes}
                     edgeTypes={edgeTypes}
-                    className="overview"
                     zoomOnDoubleClick={false} // Disable zoom on double click
                     connectionMode="loose"
                 >
-                    {/*<MiniMap position={Position.Bottom}/>*/}
                     <Controls />
                     <Background />
                 </ReactFlow>
-                {/*<Sidebar nodes={nodes} setNodes={setNodes} hidden={!sidebarVisible} />*/}
                 {contextMenu.visible && (
                     <NodeContextMenu
                         id={contextMenu.nodeId}
@@ -188,6 +241,7 @@ const Flow = ({ setSelectedNode }) => {
             </div>
         </div>
     );
+
 };
 
 export default Flow;
