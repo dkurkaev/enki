@@ -1,6 +1,13 @@
 import React, { useRef, useState } from 'react';
 import { ReactFlowProvider } from 'reactflow';
-import {FileAddOutlined, SaveOutlined, SelectOutlined, SwitcherOutlined, TeamOutlined} from '@ant-design/icons';
+import {
+    DownloadOutlined,
+    FileAddOutlined,
+    SaveOutlined,
+    SelectOutlined,
+    SwitcherOutlined,
+    TeamOutlined
+} from '@ant-design/icons';
 import { FloatButton } from 'antd';
 import './index.css';
 import { Breadcrumb, Layout, Menu, theme } from 'antd';
@@ -9,6 +16,8 @@ import AddNodeButton from './components/js/AddNodeButton';
 import SaveChangesButton from './components/js/SaveChangesButton';
 import NodeEdit from './components/js/NodeEdit'; // Import NodeEdit
 import logo from './assets/logo.png';
+import { exportToXML } from './api'; // Import the new API function
+
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -67,6 +76,21 @@ const App = () => {
         }
     };
 
+    const handleExportToXML = async () => {
+        try {
+            const blob = await exportToXML();
+            const url = window.URL.createObjectURL(new Blob([blob]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'diagram.xml');
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode.removeChild(link);
+        } catch (error) {
+            console.error('Error exporting to XML:', error);
+        }
+    };
+
     return (
         <Layout style={{ minHeight: '100vh' }}>
             <Header className="header">
@@ -121,6 +145,7 @@ const App = () => {
                                 <FloatButton icon={<FileAddOutlined />} onClick={handleAddNode} />
                                 <FloatButton icon={<SaveOutlined />} onClick={handleSaveChanges} />
                                 <FloatButton icon={<SelectOutlined />} onClick={handleToggleSidebar} />
+                                <FloatButton icon={<DownloadOutlined />} onClick={handleExportToXML} /> {/* New export button */}
                             </FloatButton.Group>
                         </div>
                     </Content>

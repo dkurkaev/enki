@@ -63,3 +63,10 @@ export const fetchEdges = async () => {
     console.log("Edges fetched:", response.data);
     return response.data;
 };
+
+export const exportToXML = async () => {
+    const response = await axios.get(`${API_BASE_PATH}/export/xml`, {
+        responseType: 'blob'
+    });
+    return response.data;
+};

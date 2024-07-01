@@ -1,7 +1,12 @@
 from ninja import Router
 from ...models import Node, Edge
 from .schemas import NodeSchema, EdgeSchema
+from ...extractor import create_xml
 from django.shortcuts import get_object_or_404
+from django.http import FileResponse
+import tempfile
+
+
 from typing import List
 
 router = Router()
@@ -62,3 +67,15 @@ def delete_edge(request, edge_id: str):
     edge = Edge.objects.get(id=edge_id)
     edge.delete()
     return 204
+
+@router.get("/export/xml")
+def export_to_xml(request):
+    nodes = Node.objects.all()
+    edges = Edge.objects.all()
+    xml_content = create_xml(nodes, edges)
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.xml') as temp_file:
+        temp_file.write(xml_content.encode('utf-8'))
+        temp_file_path = temp_file.name
+
+    return FileResponse(open(temp_file_path, 'rb'), as_attachment=True, filename='diagram.xml')
